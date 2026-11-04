@@ -11,15 +11,15 @@ Legenda: **DoD** = *definition of done*, yaitu syarat sebuah task dianggap seles
 
 ### 1. Setup
 
-- [ ] **1.1 Buat project.** Jalankan `laravel new cliptalk` → pilih starter kit **React**, auth **none/Laravel built-in** (boleh dimatikan untuk MVP), testing Pest, database SQLite.
+- [x] **1.1 Buat project.** Jalankan `laravel new cliptalk` → pilih starter kit **React**, auth **none/Laravel built-in** (boleh dimatikan untuk MVP), testing Pest, database SQLite.
   DoD: `composer run dev` berjalan dan halaman welcome tampil.
-- [ ] **1.2 Bersihkan starter kit.** Hapus halaman dashboard/settings yang tidak dipakai, dan matikan sidebar layout bawaan.
+- [x] **1.2 Bersihkan starter kit.** Hapus halaman dashboard/settings yang tidak dipakai, dan matikan sidebar layout bawaan.
   DoD: route `/` merender halaman kosong `upload` lewat Inertia.
-- [ ] **1.3 Pasang dependensi.** Jalankan `npm i @fontsource-variable/geist @fontsource-variable/geist-mono lucide-react`, lalu `npx shadcn@latest add button badge card input label switch toggle-group progress alert separator tooltip sonner`.
+- [x] **1.3 Pasang dependensi.** Jalankan `npm i @fontsource-variable/geist @fontsource-variable/geist-mono lucide-react`, lalu `npx shadcn@latest add button badge card input label switch toggle-group progress alert separator tooltip sonner`.
   DoD: build sukses.
-- [ ] **1.4 Pasang token.** Ganti isi `resources/css/app.css` dengan blok token dari DESIGN.md §2, lalu sesuaikan varian Button/Badge shadcn (tambahkan Badge tone `range`, `success`, `warning`, dan Button `destructive` berupa teks tanpa isian).
+- [x] **1.4 Pasang token.** Ganti isi `resources/css/app.css` dengan blok token dari DESIGN.md §2, lalu sesuaikan varian Button/Badge shadcn (tambahkan Badge tone `range`, `success`, `warning`, dan Button `destructive` berupa teks tanpa isian).
   DoD: halaman uji `/_design` (khusus dev) menampilkan semua varian di tema terang dan gelap.
-- [ ] **1.5 Toggle tema.** Tambahkan tombol tema di menu avatar, simpan pilihannya di `localStorage`, dan default ikut sistem.
+- [x] **1.5 Toggle tema.** Tambahkan tombol tema di menu avatar, simpan pilihannya di `localStorage`, dan default ikut sistem.
 
 ### 2. Fondasi
 

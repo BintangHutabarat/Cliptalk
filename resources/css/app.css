@@ -1,9 +1,170 @@
 @import 'tailwindcss';
+@import 'tw-animate-css';
+@import '@fontsource-variable/geist';
+@import '@fontsource-variable/geist-mono';
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
+@custom-variant dark (&:where(.dark, .dark *));
 
-@theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+/* Token ClipTalk (DESIGN.md §2). Satu-satunya tempat warna literal boleh ditulis. */
+:root,
+.light {
+    --background: #ffffff;
+    --foreground: #09090b;
+    --card: #ffffff;
+    --card-foreground: #09090b;
+    --popover: #ffffff;
+    --popover-foreground: #09090b;
+    --muted: #f4f4f5;
+    --muted-foreground: #68686f;
+    --accent: #f4f4f5;
+    --accent-foreground: #09090b;
+    --primary: #09090b;
+    --primary-foreground: #fafafa;
+    --secondary: #f4f4f5;
+    --secondary-foreground: #09090b;
+    --border: #e4e4e7;
+    --input: #8a8a93; /* border kontrol, ≥3:1 */
+    --ring: #09090b;
+    --destructive: #b91c1c;
+    --destructive-soft: #fef2f2;
+    --success: #15803d;
+    --success-soft: #f0fdf4;
+    --warning: #c2410c;
+    --warning-soft: #fff7ed;
+
+    /* ClipTalk */
+    --range: #f5b800;
+    --range-foreground: #09090b;
+    --range-ink: #8a5d00;
+    --range-soft: #fff6d6;
+    --stage: #000000;
+    --stage-foreground: #ffffff;
+    --stage-muted: #a1a1aa;
+    --caption-ink: #ffffff;
+    --caption-edge: #000000;
+    --caption-plate: rgba(0, 0, 0, 0.72);
+
+    --shadow-xs-value: 0 1px 2px 0 rgba(9, 9, 11, 0.06);
+    --shadow-pop-value: 0 8px 24px -8px rgba(9, 9, 11, 0.18);
+
+    --radius: 10px;
+}
+
+.dark {
+    --background: #09090b;
+    --foreground: #fafafa;
+    --card: #111113;
+    --card-foreground: #fafafa;
+    --popover: #111113;
+    --popover-foreground: #fafafa;
+    --muted: #1c1c1f;
+    --muted-foreground: #a1a1aa;
+    --accent: #27272a;
+    --accent-foreground: #fafafa;
+    --primary: #fafafa;
+    --primary-foreground: #09090b;
+    --secondary: #1c1c1f;
+    --secondary-foreground: #fafafa;
+    --border: #27272a;
+    --input: #6b6b75;
+    --ring: #fafafa;
+    --destructive: #f87171;
+    --destructive-soft: #2a0b0b;
+    --success: #4ade80;
+    --success-soft: #052e16;
+    --warning: #fb923c;
+    --warning-soft: #2b1406;
+    --range-ink: #ffd24d;
+    --range-soft: #2b2108;
+
+    --shadow-xs-value: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+    --shadow-pop-value: 0 8px 24px -8px rgba(0, 0, 0, 0.7);
+}
+
+@theme inline {
+    --font-sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: 'Geist Mono Variable', ui-monospace, Consolas, monospace;
+
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+    --color-destructive: var(--destructive);
+    --color-destructive-soft: var(--destructive-soft);
+    --color-success: var(--success);
+    --color-success-soft: var(--success-soft);
+    --color-warning: var(--warning);
+    --color-warning-soft: var(--warning-soft);
+    --color-range: var(--range);
+    --color-range-foreground: var(--range-foreground);
+    --color-range-ink: var(--range-ink);
+    --color-range-soft: var(--range-soft);
+    --color-stage: var(--stage);
+    --color-stage-foreground: var(--stage-foreground);
+    --color-stage-muted: var(--stage-muted);
+    --color-caption-ink: var(--caption-ink);
+    --color-caption-edge: var(--caption-edge);
+    --color-caption-plate: var(--caption-plate);
+
+    --radius-xs: 2px; /* rentang waktu */
+    --radius-sm: 4px; /* badge */
+    --radius-md: 6px; /* button, input */
+    --radius-lg: 10px; /* card, dropzone, player */
+    --radius-frame: 20px; /* bingkai 9:16 saja */
+
+    --shadow-xs: var(--shadow-xs-value); /* thumb switch, segmen aktif */
+    --shadow-pop: var(--shadow-pop-value); /* menu, toast */
+}
+
+@layer base {
+    *,
+    ::before,
+    ::after {
+        border-color: var(--color-border);
+    }
+
+    html {
+        color-scheme: light;
+    }
+
+    html.dark {
+        color-scheme: dark;
+    }
+
+    body {
+        background-color: var(--color-background);
+        color: var(--color-foreground);
+        font-size: 14px;
+        line-height: 22px;
+    }
+
+    /* Fokus seragam untuk semua elemen interaktif (RULE.md §7). */
+    :focus-visible {
+        outline: 2px solid var(--color-ring);
+        outline-offset: 2px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
 }
