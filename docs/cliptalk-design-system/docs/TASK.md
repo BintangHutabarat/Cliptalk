@@ -31,17 +31,17 @@ Legenda: **DoD** = *definition of done*, yaitu syarat sebuah task dianggap seles
 
 ### 3. Komponen (`components/cliptalk/`)
 
-- [ ] **3.1** `Wordmark`, `Stepper`, `AppHeader`, dan `clip-flow-layout` (header 56px, tanpa sidebar, container dengan lebar per halaman).
-- [ ] **3.2** `Dropzone` (drag & drop, validasi tipe/ukuran di client, state drag-over) dan `FileRow`.
-- [ ] **3.3** `SettingRow` (baris dalam satu Card dengan `divide-y`).
-- [ ] **3.4** `RangeBar` dengan props `total`, `start`, `end`, `playhead`, `ticks`, `compact`.
-- [ ] **3.5** `VideoPlayer`: `<video>` di atas `stage`, kontrol play/pause, mundur/maju 5 detik, timecode `00:02:14 / 00:38:20`, kecepatan putar, RangeBar dengan `ticks`, dan klik di track untuk seek. Ekspos `seek(sec)` lewat ref dan event `onTimeUpdate`.
-- [ ] **3.6** `TranscriptLine` dan daftar transkrip yang di-scroll di dalam Card. Kalimat yang sedang diputar ikut di-scroll ke tengah secara otomatis (`scrollIntoView({block:'nearest'})`, matikan saat pengguna sedang menggulir).
-- [ ] **3.7** `SegmentCandidate` dan daftar dengan `role="radiogroup"` (bisa dinavigasi dengan panah atas/bawah).
-- [ ] **3.8** `JobProgress`.
-- [ ] **3.9** `ClipFrame` (9:16, overlay subtitle gaya `outline` dan `plate`, subtitle mengikuti `currentTime` dari kata-kata di transkrip).
-- [ ] **3.10** `SpecList`.
-- [ ] **3.11** Halaman `/_design` (hanya di env local) yang menampilkan semua komponen di atas. Ini pengganti Storybook.
+- [x] **3.1** `Wordmark`, `Stepper`, `AppHeader`, dan `clip-flow-layout` (header 56px, tanpa sidebar, container dengan lebar per halaman).
+- [x] **3.2** `Dropzone` (drag & drop, validasi tipe/ukuran di client, state drag-over) dan `FileRow`.
+- [x] **3.3** `SettingRow` (baris dalam satu Card dengan `divide-y`).
+- [x] **3.4** `RangeBar` dengan props `total`, `start`, `end`, `playhead`, `ticks`, `compact`.
+- [x] **3.5** `VideoPlayer`: `<video>` di atas `stage`, kontrol play/pause, mundur/maju 5 detik, timecode `00:02:14 / 00:38:20`, kecepatan putar, RangeBar dengan `ticks`, dan klik di track untuk seek. Ekspos `seek(sec)` lewat ref dan event `onTimeUpdate`.
+- [x] **3.6** `TranscriptLine` dan daftar transkrip yang di-scroll di dalam Card. Kalimat yang sedang diputar ikut di-scroll ke tengah secara otomatis (`scrollIntoView({block:'nearest'})`, matikan saat pengguna sedang menggulir).
+- [x] **3.7** `SegmentCandidate` dan daftar dengan `role="radiogroup"` (bisa dinavigasi dengan panah atas/bawah).
+- [x] **3.8** `JobProgress`.
+- [x] **3.9** `ClipFrame` (9:16, overlay subtitle gaya `outline` dan `plate`, subtitle mengikuti `currentTime` dari kata-kata di transkrip).
+- [x] **3.10** `SpecList`.
+- [x] **3.11** Halaman `/_design` (hanya di env local) yang menampilkan semua komponen di atas. Ini pengganti Storybook.
   DoD: semua komponen tampil benar di 360px dan 1280px, dalam tema terang dan gelap.
 
 ### 4. Halaman

@@ -28,7 +28,7 @@ const Toaster = (props: ToasterProps) => {
                     '--border-radius': 'var(--radius-md)',
                 } as CSSProperties
             }
-            toastOptions={{ style: { boxShadow: 'var(--shadow-pop)' } }}
+            toastOptions={{ style: { boxShadow: 'var(--shadow-pop-value)' } }}
             {...props}
         />
     );

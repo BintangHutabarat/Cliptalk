@@ -89,7 +89,7 @@ export const copy = {
         candidatesCount: (n: number) => `${n} kandidat`,
         candidatesLabel: 'Kandidat klip',
         transcriptTitle: 'Transkrip',
-        transcriptTotal: (duration: string) => `${duration} total`,
+        transcriptTotal: 'total',
         lowConfidence: 'Kurang yakin',
         footnote: 'Rasio 9:16 diterapkan otomatis di langkah berikutnya.',
         score: (n: number) => `Skor ${n}`,

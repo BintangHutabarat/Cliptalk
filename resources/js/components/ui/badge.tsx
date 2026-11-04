@@ -10,7 +10,7 @@ const badgeVariants = cva(
         variants: {
             tone: {
                 neutral: 'bg-muted text-foreground',
-                outline: 'bg-transparent text-foreground shadow-[inset_0_0_0_1px_var(--color-border)]',
+                outline: 'bg-transparent text-foreground shadow-[inset_0_0_0_1px_var(--border)]',
                 // Hanya skor kandidat ≥ 90 atau penanda "Terpilih" (RULE.md §3.2).
                 range: 'bg-range text-range-foreground',
                 success: 'bg-success-soft text-success',
