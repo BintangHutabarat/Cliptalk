@@ -17,6 +17,8 @@ type TranscriptListProps = {
     range?: { start: number; end: number } | null;
     onSelect: (segment: TranscriptSegment) => void;
     className?: string;
+    /** Tinggi area gulir; halaman bisa menggantinya agar mengikuti tinggi kolom di sebelahnya. */
+    scrollClassName?: string;
 };
 
 // Di bawah ambang ini Faster-Whisper biasanya kurang yakin.
@@ -24,7 +26,7 @@ const LOW_CONFIDENCE_LOGPROB = -0.8;
 // Setelah pengguna menggulir sendiri, auto-scroll berhenti sebentar.
 const USER_SCROLL_PAUSE_MS = 3000;
 
-export function TranscriptList({ segments, total, playingId, range, onSelect, className }: TranscriptListProps) {
+export function TranscriptList({ segments, total, playingId, range, onSelect, className, scrollClassName = 'max-h-[420px] lg:max-h-[560px]' }: TranscriptListProps) {
     const scrollRef = useRef<HTMLDivElement>(null);
     const lineRefs = useRef(new Map<number, HTMLButtonElement>());
     const userScrolledAt = useRef(0);
@@ -59,7 +61,7 @@ export function TranscriptList({ segments, total, playingId, range, onSelect, cl
                 onWheel={markUserScroll}
                 onTouchMove={markUserScroll}
                 onPointerDown={(e) => e.target === e.currentTarget && markUserScroll()}
-                className="relative max-h-[420px] min-h-0 flex-1 divide-y overflow-y-auto overscroll-contain lg:max-h-[560px]"
+                className={cn('relative min-h-0 flex-1 divide-y overflow-y-auto overscroll-contain', scrollClassName)}
             >
                 {segments.map((segment) => (
                     <TranscriptLine

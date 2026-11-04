@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Support\MockData;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -12,8 +14,12 @@ class ProjectController extends Controller
     /**
      * Fase 1: file belum benar-benar diunggah, langsung lanjut ke project demo.
      */
-    public function store(): RedirectResponse
+    public function store(Request $request): RedirectResponse
     {
+        $request->validate([
+            'targetDuration' => ['required', 'integer', Rule::in([30, 60, 90])],
+        ]);
+
         return to_route('projects.processing', MockData::DEMO_ID);
     }
 

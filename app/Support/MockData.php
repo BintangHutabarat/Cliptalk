@@ -39,7 +39,17 @@ class MockData
     {
         abort_unless($id === self::DEMO_ID, 404);
 
-        return self::get('clip');
+        return [...self::get('clip'), ...session('mock.clip', [])];
+    }
+
+    /**
+     * Menyimpan perubahan draf klip demo (kandidat terpilih, judul, subtitle) untuk halaman berikutnya.
+     *
+     * @param  array<string, mixed>  $attributes
+     */
+    public static function rememberClip(array $attributes): void
+    {
+        session(['mock.clip' => [...session('mock.clip', []), ...$attributes]]);
     }
 
     /**

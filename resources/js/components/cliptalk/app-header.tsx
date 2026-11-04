@@ -6,7 +6,7 @@ import { Wordmark } from '@/components/cliptalk/wordmark';
 import { copy } from '@/lib/copy';
 
 type AppHeaderProps = {
-    current: Step;
+    current?: Step;
     initials: string;
 };
 

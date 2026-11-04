@@ -15,7 +15,7 @@ const widths = {
 } as const;
 
 type ClipFlowLayoutProps = {
-    step: Step;
+    step?: Step;
     width: keyof typeof widths;
     children: ReactNode;
 };

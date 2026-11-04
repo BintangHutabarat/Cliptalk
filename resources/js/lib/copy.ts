@@ -45,9 +45,11 @@ export const copy = {
         dropActive: 'Lepaskan untuk mengunggah',
         dropHint: 'MP4, MOV, atau WebM. Maksimal 2 GB.',
         uploading: 'Mengunggah…',
+        uploadingLabel: 'Progres unggahan',
         removeFile: (name: string) => `Hapus ${name}`,
         durationTitle: 'Durasi klip',
         durationDescription: 'Target panjang tiap klip.',
+        durationOption: (sec: number) => `${sec} dtk`,
         formatTitle: 'Format',
         formatValue: '9:16  1080×1920',
         languageTitle: 'Bahasa transkrip',
@@ -120,6 +122,7 @@ export const copy = {
             plate: 'Latar gelap',
         },
         rendering: 'Merender klip…',
+        renderingLabel: 'Progres render',
     },
 
     show: {
@@ -128,6 +131,7 @@ export const copy = {
         title: 'Klip siap diunduh',
         expiry: 'File dihapus otomatis 24 jam setelah dibuat.',
         downloaded: 'Video diunduh',
+        downloadUnavailable: 'Unduhan belum tersedia di versi demo. File dibuat setelah render di server aktif.',
     },
 
     spec: {
@@ -137,6 +141,7 @@ export const copy = {
         ratio: 'Rasio',
         format: 'Format',
         captions: 'Subtitle',
+        source: 'Video sumber',
         captionsOn: (style: string) => `Aktif, ${style.toLowerCase()}`,
         captionsOff: 'Tidak aktif',
         ratioValue: '9:16  1080×1920',

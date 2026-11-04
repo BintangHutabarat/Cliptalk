@@ -4,17 +4,33 @@ namespace App\Http\Controllers;
 
 use App\Support\MockData;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ClipController extends Controller
 {
     /**
-     * Fase 1: kandidat yang dipilih belum disimpan, langsung ke klip demo.
+     * Fase 1: kandidat terpilih disimpan di session sebagai draf klip demo.
      */
-    public function store(string $project): RedirectResponse
+    public function store(Request $request, string $project): RedirectResponse
     {
         MockData::project($project);
+        $candidates = collect(MockData::get('candidates'));
+
+        $validated = $request->validate([
+            'candidateId' => ['required', 'string', Rule::in($candidates->pluck('id'))],
+        ]);
+
+        $candidate = $candidates->firstWhere('id', $validated['candidateId']);
+
+        MockData::rememberClip([
+            'candidateId' => $candidate['id'],
+            'title' => $candidate['title'],
+            'start' => $candidate['start'],
+            'end' => $candidate['end'],
+        ]);
 
         return to_route('clips.preview', MockData::DEMO_ID);
     }
@@ -31,11 +47,23 @@ class ClipController extends Controller
     }
 
     /**
-     * Fase 1: render disimulasikan di frontend, lalu langsung ke halaman unduh.
+     * Fase 1: render disimulasikan di frontend; pengaturan akhir disimpan lalu ke halaman unduh.
      */
-    public function render(string $clip): RedirectResponse
+    public function render(Request $request, string $clip): RedirectResponse
     {
         MockData::clip($clip);
+
+        $validated = $request->validate([
+            'title' => ['required', 'string', 'max:60'],
+            'showCaptions' => ['required', 'boolean'],
+            'captionStyle' => ['required', Rule::in(['outline', 'plate'])],
+        ]);
+
+        MockData::rememberClip([
+            'title' => $validated['title'],
+            'showCaptions' => (bool) $validated['showCaptions'],
+            'captionStyle' => $validated['captionStyle'],
+        ]);
 
         return to_route('clips.show', MockData::DEMO_ID);
     }

@@ -46,18 +46,18 @@ Legenda: **DoD** = *definition of done*, yaitu syarat sebuah task dianggap seles
 
 ### 4. Halaman
 
-- [ ] **4.1 Unggah (`upload`).** Layout DESIGN.md §7.1 dengan state kosong, file dipilih, mengunggah (simulasi progres), dan error validasi. Tombol "Mulai" melakukan POST mock lalu redirect ke processing.
-- [ ] **4.2 Memproses (`projects/processing`).** JobProgress dengan simulasi polling, otomatis pindah ke segments saat `ready`, dan state gagal dengan tombol "Coba lagi".
-- [ ] **4.3 Pilih bagian (`projects/segments`).** Grid 7/5 berisi video + kandidat dan transkrip.
+- [x] **4.1 Unggah (`upload`).** Layout DESIGN.md §7.1 dengan state kosong, file dipilih, mengunggah (simulasi progres), dan error validasi. Tombol "Mulai" melakukan POST mock lalu redirect ke processing.
+- [x] **4.2 Memproses (`projects/processing`).** JobProgress dengan simulasi polling, otomatis pindah ke segments saat `ready`, dan state gagal dengan tombol "Coba lagi".
+- [x] **4.3 Pilih bagian (`projects/segments`).** Grid 7/5 berisi video + kandidat dan transkrip.
   - Kandidat pertama terpilih secara default.
   - Klik kandidat → `seek(start)`, kalimat di dalam rentang diberi `range-soft`.
   - Klik kalimat → `seek(time)`.
   - Kalimat yang sedang diputar ditandai.
   - "Buat klip" melakukan POST mock lalu ke preview.
   DoD: pada layar ≤ 1024px susunannya menjadi satu kolom (video → kandidat → transkrip).
-- [ ] **4.4 Pratinjau (`clips/preview`).** ClipFrame + Input judul (penghitung 60), Switch subtitle, SegmentedControl gaya, dan SpecList. Perubahan langsung tampil di ClipFrame. "Render klip" menampilkan progres singkat lalu ke show.
-- [ ] **4.5 Unduh (`clips/show`).** Badge "Klip siap", ClipFrame kecil, SpecList (nama file dari slug judul: `cliptalk_<slug>.mp4`), tombol "Unduh video", "Unduh SRT", dan "Buat klip lain", plus catatan "File dihapus otomatis 24 jam setelah dibuat."
-- [ ] **4.6 Halaman 404/kedaluwarsa.** "Klip ini sudah dihapus. File disimpan 24 jam setelah dibuat." dengan tombol "Buat klip baru".
+- [x] **4.4 Pratinjau (`clips/preview`).** ClipFrame + Input judul (penghitung 60), Switch subtitle, SegmentedControl gaya, dan SpecList. Perubahan langsung tampil di ClipFrame. "Render klip" menampilkan progres singkat lalu ke show.
+- [x] **4.5 Unduh (`clips/show`).** Badge "Klip siap", ClipFrame kecil, SpecList (nama file dari slug judul: `cliptalk_<slug>.mp4`), tombol "Unduh video", "Unduh SRT", dan "Buat klip lain", plus catatan "File dihapus otomatis 24 jam setelah dibuat."
+- [x] **4.6 Halaman 404/kedaluwarsa.** "Klip ini sudah dihapus. File disimpan 24 jam setelah dibuat." dengan tombol "Buat klip baru".
 
 ### 5. Polesan dan QA frontend
 

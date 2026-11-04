@@ -6,7 +6,8 @@ import { cn } from '@/lib/utils';
 export type Step = 1 | 2 | 3 | 4;
 
 type StepperProps = {
-    current: Step;
+    /** Kosong di halaman di luar alur (mis. 404): tidak ada langkah aktif. */
+    current?: Step;
     className?: string;
 };
 
@@ -15,7 +16,7 @@ export function Stepper({ current, className }: StepperProps) {
         <ol aria-label={copy.steps.label} className={cn('flex items-center gap-1.5 text-[13px] leading-5 @min-[640px]:gap-2', className)}>
             {copy.steps.items.map((label, index) => {
                 const n = index + 1;
-                const done = n < current;
+                const done = current != null && n < current;
                 const active = n === current;
 
                 return (
