@@ -6,7 +6,8 @@
         "build": "vite build",
         "dev": "vite",
         "lint": "eslint .",
-        "types": "tsc --noEmit"
+        "types": "tsc --noEmit",
+        "test": "node --test resources/js/**/*.test.ts"
     },
     "devDependencies": {
         "@eslint/js": "^10.0.1",

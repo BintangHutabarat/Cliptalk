@@ -23,11 +23,11 @@ Legenda: **DoD** = *definition of done*, yaitu syarat sebuah task dianggap seles
 
 ### 2. Fondasi
 
-- [ ] **2.1 Type domain.** Salin `resources/js/types/cliptalk.ts` persis dari SYSTEM-DESIGN.md §4.
-- [ ] **2.2 Util waktu.** Buat `lib/time.ts` berisi `formatTimecode(sec) → "00:02:14"`, `formatRange(a,b) → "00:02:14 – 00:02:58"`, `formatShort(sec) → "02:14"`, `formatDuration(sec) → "44 detik"`, dan `formatBytes(n) → "342 MB"`.
+- [x] **2.1 Type domain.** Salin `resources/js/types/cliptalk.ts` persis dari SYSTEM-DESIGN.md §4.
+- [x] **2.2 Util waktu.** Buat `lib/time.ts` berisi `formatTimecode(sec) → "00:02:14"`, `formatRange(a,b) → "00:02:14 – 00:02:58"`, `formatShort(sec) → "02:14"`, `formatDuration(sec) → "44 detik"`, dan `formatBytes(n) → "342 MB"`.
   DoD: ada unit test Vitest atau minimal pemeriksaan di `/_design`.
-- [ ] **2.3 Copy.** Kumpulkan semua string UI di `lib/copy.ts`.
-- [ ] **2.4 Mock.** Buat `mocks/project.ts`, `transcript.ts` (≥ 40 segmen Bahasa Indonesia, 00:00–38:20, ada word timestamps), `candidates.ts` (3 kandidat: 98/89/85), dan `clip.ts`. Siapkan juga controller Laravel yang mengirim props mock ke setiap halaman (SYSTEM-DESIGN.md §3).
+- [x] **2.3 Copy.** Kumpulkan semua string UI di `lib/copy.ts`.
+- [x] **2.4 Mock.** Buat `mocks/project.ts`, `transcript.ts` (≥ 40 segmen Bahasa Indonesia, 00:00–38:20, ada word timestamps), `candidates.ts` (3 kandidat: 98/89/85), dan `clip.ts`. Siapkan juga controller Laravel yang mengirim props mock ke setiap halaman (SYSTEM-DESIGN.md §3).
 
 ### 3. Komponen (`components/cliptalk/`)
 
