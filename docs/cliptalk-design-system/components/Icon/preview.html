@@ -1,0 +1,12 @@
+<!-- @dsCard group="Dasar" height=64 -->
+<!doctype html>
+<html lang="id">
+<head><meta charset="utf-8"><title>Icon — pratinjau</title></head>
+<body>
+<div id="root" class="ct-pad"></div>
+<script>
+  var K = window.ClipTalk, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment,null,['upload','film','check','play','download','back','close','info','alert','scissors','captions'].map(function(n){return h('span',{key:n,title:n,style:{display:'inline-flex'}},h(K.Icon,{name:n,size:20}));})));
+</script>
+</body>
+</html>

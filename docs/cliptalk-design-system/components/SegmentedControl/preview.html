@@ -1,0 +1,14 @@
+<!-- @dsCard group="Form" height=72 -->
+<!doctype html>
+<html lang="id">
+<head><meta charset="utf-8"><title>SegmentedControl — pratinjau</title></head>
+<body>
+<div id="root" class="ct-pad"></div>
+<script>
+  var K = window.ClipTalk, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render((function(){function D(){var a=React.useState(60),b=React.useState('outline');return h(React.Fragment,null,
+ h(K.SegmentedControl,{ariaLabel:'Durasi klip',value:a[0],onChange:a[1],options:[{value:30,label:'30 dtk'},{value:60,label:'60 dtk'},{value:90,label:'90 dtk'}]}),
+ h(K.SegmentedControl,{ariaLabel:'Gaya subtitle',value:b[0],onChange:b[1],options:[{value:'outline',label:'Outline'},{value:'plate',label:'Latar gelap'}]}));}return h(D);})());
+</script>
+</body>
+</html>

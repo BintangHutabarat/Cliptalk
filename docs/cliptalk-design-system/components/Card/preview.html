@@ -1,0 +1,13 @@
+<!-- @dsCard group="Tata letak" height=200 -->
+<!doctype html>
+<html lang="id">
+<head><meta charset="utf-8"><title>Card — pratinjau</title></head>
+<body>
+<div id="root" class="ct-stack"></div>
+<script>
+  var K = window.ClipTalk, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(K.Card,{title:'Rekomendasi bagian',description:'Diurutkan dari skor tertinggi.',action:h(K.Badge,{mono:true},'3 kandidat'),footer:h(React.Fragment,null,h(K.Button,{variant:'ghost'},'Kembali'),h(K.Button,null,'Buat klip'))},
+ h('p',{style:{margin:0,color:'var(--muted-foreground)'}},'Isi panel di sini.')));
+</script>
+</body>
+</html>

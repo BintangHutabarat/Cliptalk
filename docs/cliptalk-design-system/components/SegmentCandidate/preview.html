@@ -1,0 +1,13 @@
+<!-- @dsCard group="Editor" height=280 -->
+<!doctype html>
+<html lang="id">
+<head><meta charset="utf-8"><title>SegmentCandidate — pratinjau</title></head>
+<body>
+<div id="root" class="ct-stack" style="max-width:720px"></div>
+<script>
+  var K = window.ClipTalk, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render((function(){function D(){var s=React.useState(0);var C=[['Bagaimana teknologi mengubah cara kerja',134,178,98],['Kreativitas vs otomatisasi alat digital',854,906,89],['Pentingnya hook 3 detik pertama video',1625,1668,85]];
+return h('div',{className:'ct-card'},h('div',{className:'ct-cands',role:'radiogroup','aria-label':'Kandidat klip'},C.map(function(c,i){return h(K.SegmentCandidate,{key:i,title:c[0],start:c[1],end:c[2],score:c[3],total:2300,selected:s[0]===i,onSelect:function(){s[1](i);}});})));}return h(D);})());
+</script>
+</body>
+</html>

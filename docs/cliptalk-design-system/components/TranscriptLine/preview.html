@@ -1,0 +1,13 @@
+<!-- @dsCard group="Editor" height=300 -->
+<!doctype html>
+<html lang="id">
+<head><meta charset="utf-8"><title>TranscriptLine — pratinjau</title></head>
+<body>
+<div id="root" class="ct-stack" style="max-width:720px"></div>
+<script>
+  var K = window.ClipTalk, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render((function(){var L=[[134,'Pembicara 1','Menurut saya, perkembangan teknologi sekarang mengubah cara kita bekerja.',1,1],[141,'Pembicara 1','Masalahnya bukan pada teknologinya, tetapi bagaimana kita menggunakannya.',1,0],[149,'Pembicara 2','Nah, ini yang menurut saya menarik untuk dibahas dalam riset ini.',1,0],[160,'Pembicara 2','Ketika semua serba otomatis, kurasi manusia justru jadi lebih krusial.',0,0]];
+return h('div',{className:'ct-card'},h('div',{className:'ct-transcript'},L.map(function(l){return h(K.TranscriptLine,{key:l[0],time:l[0],speaker:l[1],text:l[2],inRange:!!l[3],playing:!!l[4],onSelect:function(){}});})));})());
+</script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+<!-- @dsCard group="Form" height=120 -->
+<!doctype html>
+<html lang="id">
+<head><meta charset="utf-8"><title>Input — pratinjau</title></head>
+<body>
+<div id="root" class="ct-stack"></div>
+<script>
+  var K = window.ClipTalk, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render((function(){function D(){var s=React.useState('Bagaimana teknologi mengubah cara kerja');return h(K.Input,{id:'judul',label:'Judul klip',maxLength:60,value:s[0],onChange:function(e){s[1](e.target.value);},hint:'Dipakai sebagai nama file dan judul metadata.'});}return h(D);})());
+</script>
+</body>
+</html>

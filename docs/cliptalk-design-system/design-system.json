@@ -1,0 +1,14 @@
+{
+  "v": 3,
+  "layout": "files",
+  "createdOnFiles": { "v": 1, "at": "2026-11-04T14:43:19Z" },
+  "title": "ClipTalk",
+  "namespace": "ClipTalk",
+  "libraries": [{ "name": "react", "version": "18" }, { "name": "react-dom", "version": "18" }],
+  "sections": {},
+  "groups": [],
+  "assetGroups": {},
+  "blobs": {},
+  "docs": { "readme": "project/README.md", "sections": [] },
+  "lastChange": { "by": "Claude", "at": "2026-11-04T14:55:00Z", "via": "Claude", "note": "Design system awal ClipTalk: token, README, 19 komponen, cover." }
+}

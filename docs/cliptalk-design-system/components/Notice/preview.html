@@ -1,0 +1,15 @@
+<!-- @dsCard group="Status" height=150 -->
+<!doctype html>
+<html lang="id">
+<head><meta charset="utf-8"><title>Notice — pratinjau</title></head>
+<body>
+<div id="root" class="ct-stack"></div>
+<script>
+  var K = window.ClipTalk, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment,null,
+ h(K.Notice,null,'Rasio 9:16 diterapkan otomatis di langkah berikutnya.'),
+ h(K.Notice,{tone:'warning'},'Bagian ini hanya 18 detik. Perpanjang rentang agar konteksnya utuh.'),
+ h(K.Notice,{tone:'error'},'Render gagal: FFmpeg tidak menemukan stream audio. Unggah ulang video dengan audio.')));
+</script>
+</body>
+</html>
