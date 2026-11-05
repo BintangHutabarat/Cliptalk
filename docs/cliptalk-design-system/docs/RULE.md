@@ -13,7 +13,8 @@ Aturan ini wajib diikuti siapa pun yang menulis kode di repo ini, termasuk AI co
 
 ## 2. Stack (jangan diganti tanpa diskusi)
 
-- Laravel 12, starter kit **React** (Inertia 2 + React 19 + TypeScript + Tailwind CSS 4 + shadcn/ui).
+- Laravel 13 + **React** (Inertia 3 + React 19 + TypeScript + Tailwind CSS 4 + shadcn/ui), dipasang manual tanpa starter kit.
+- Database **PostgreSQL**, dijalankan lewat Docker (Laravel Sail). Jangan kembali ke SQLite untuk development.
 - Font: `@fontsource-variable/geist`, `@fontsource-variable/geist-mono`.
 - Ikon: `lucide-react`, selalu dengan `strokeWidth={1.75}`.
 - Package manager: npm. PHP ≥ 8.2, Node ≥ 20.
