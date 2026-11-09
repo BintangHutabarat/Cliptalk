@@ -67,6 +67,7 @@ export interface Clip {
     stage: ClipStage;
     progress: number; // 0–100
     outputUrl?: string | null;
+    downloadUrl?: string | null;
     outputSizeBytes?: number | null;
     srtUrl?: string | null;
     sha256?: string | null;

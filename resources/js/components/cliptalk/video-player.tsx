@@ -101,7 +101,7 @@ export function VideoPlayer({ src, duration, range, onTimeUpdate, ref, className
                         src={src}
                         preload="metadata"
                         playsInline
-                        className="size-full object-contain"
+                        className="size-full object-cover"
                         onTimeUpdate={(e) => update(e.currentTarget.currentTime)}
                         onPlay={() => setPlaying(true)}
                         onPause={() => setPlaying(false)}

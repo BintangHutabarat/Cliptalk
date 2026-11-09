@@ -2,11 +2,19 @@
 
 namespace Tests\Feature;
 
+use App\Models\Project;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
+use App\Services\VideoMetadataService;
+use Illuminate\Support\Facades\Bus;
 
 class CliptalkPagesTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_upload_page_sends_limits_and_durations(): void
     {
         $this->get(route('upload'))->assertInertia(fn (Assert $page) => $page
@@ -17,16 +25,29 @@ class CliptalkPagesTest extends TestCase
         );
     }
 
+
     public function test_processing_page_sends_project_and_status(): void
     {
-        $this->get(route('projects.processing', 'demo'))->assertInertia(fn (Assert $page) => $page
-            ->component('projects/processing')
-            ->where('project.id', 'demo')
-            ->where('project.stage', 'transcribing')
-            ->where('status.stage', 'transcribing')
-            ->has('status.stages', 4)
-        );
+        $project = Project::create([
+            'file_name' => 'podcast.mp4',
+            'file_path' => 'projects/test/podcast.mp4',
+            'mime_type' => 'video/mp4',
+            'size_bytes' => 1024,
+            'target_duration' => 60,
+            'duration_sec' => 173,
+            'stage' => 'uploaded',
+        ]);
+
+        $this->get(route('projects.processing', $project->id))
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('projects/processing')
+                ->where('project.id', $project->id)
+                ->where('project.stage', 'uploaded')
+                ->where('status.stage', 'uploaded')
+                ->has('status.stages', 4)
+            );
     }
+
 
     public function test_segments_page_sends_transcript_and_candidates(): void
     {
@@ -61,11 +82,70 @@ class CliptalkPagesTest extends TestCase
         );
     }
 
+
+
     public function test_upload_requires_a_supported_target_duration(): void
     {
-        $this->post(route('projects.store'), ['targetDuration' => 45])->assertSessionHasErrors('targetDuration');
-        $this->post(route('projects.store'), ['targetDuration' => 60])->assertRedirect(route('projects.processing', 'demo'));
+        Bus::fake();
+        Storage::fake('local');
+
+        // Durasi yang tidak didukung harus ditolak oleh validasi.
+        $this->post(route('projects.store'), [
+            'video' => UploadedFile::fake()->create(
+                'podcast.mp4',
+                100,
+                'video/mp4'
+            ),
+            'targetDuration' => 45,
+        ])->assertSessionHasErrors('targetDuration');
+
+        // Simulasikan hasil FFprobe untuk file video pengujian.
+        $this->mock(
+            VideoMetadataService::class,
+            function ($mock) {
+                $mock->shouldReceive('inspect')
+                    ->once()
+                    ->andReturn([
+                        'codec' => 'h264',
+                        'width' => 1920,
+                        'height' => 1080,
+                        'fps' => 29.97,
+                        'duration_sec' => 173,
+                    ]);
+            }
+        );
+
+        // Durasi yang didukung harus berhasil diproses.
+        $this->post(route('projects.store'), [
+            'video' => UploadedFile::fake()->create(
+                'podcast.mp4',
+                100,
+                'video/mp4'
+            ),
+            'targetDuration' => 60,
+        ])->assertSessionHasNoErrors();
+
+        $project = Project::query()->firstOrFail();
+
+        $this->assertSame(60, $project->target_duration);
+        $this->assertSame(173, $project->duration_sec);
+        $this->assertSame(1920, $project->width);
+        $this->assertSame(1080, $project->height);
+
+        $this->assertStringStartsWith(
+            "projects/{$project->id}/",
+            $project->file_path
+        );
+
+        Storage::disk('local')->assertExists($project->file_path);
+
+        $this->assertDatabaseHas('projects', [
+            'id' => $project->id,
+            'target_duration' => 60,
+        ]);
     }
+
+
 
     public function test_choosing_a_candidate_carries_its_range_to_the_preview(): void
     {

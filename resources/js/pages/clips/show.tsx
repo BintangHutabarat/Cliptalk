@@ -98,7 +98,7 @@ export default function Show({ project, clip }: ShowProps) {
                 <DownloadButton href={clip.srtUrl} fileName={clipFileName(clip.title, 'srt')} variant="outline">
                     {copy.actions.downloadSrt}
                 </DownloadButton>
-                <DownloadButton href={clip.outputUrl} fileName={fileName} variant="default">
+                <DownloadButton href={clip.downloadUrl} fileName={fileName} variant="default">
                     <Download {...icon} />
                     {copy.actions.downloadVideo}
                 </DownloadButton>
