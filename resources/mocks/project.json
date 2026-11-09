@@ -1,0 +1,17 @@
+{
+    "id": "demo",
+    "fileName": "podcast_teknologi_ep14.mp4",
+    "durationSec": 2300,
+    "sizeBytes": 358612992,
+    "mimeType": "video/mp4",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "sourceUrl": "/samples/podcast.mp4",
+    "targetDuration": 60,
+    "language": "id",
+    "stage": "ready",
+    "error": null,
+    "createdAt": "2026-11-04T09:00:00.000Z",
+    "expiresAt": "2026-11-05T09:00:00.000Z"
+}

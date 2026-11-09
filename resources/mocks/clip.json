@@ -1,0 +1,22 @@
+{
+    "id": "demo",
+    "projectId": "demo",
+    "candidateId": "c1",
+    "title": "Bagaimana teknologi mengubah cara kerja",
+    "start": 134,
+    "end": 178,
+    "showCaptions": true,
+    "captionStyle": "outline",
+    "width": 1080,
+    "height": 1920,
+    "videoCodec": "h264",
+    "audioCodec": "aac",
+    "stage": "draft",
+    "progress": 0,
+    "outputUrl": null,
+    "outputSizeBytes": null,
+    "srtUrl": null,
+    "sha256": null,
+    "error": null,
+    "expiresAt": "2026-11-05T09:00:00.000Z"
+}

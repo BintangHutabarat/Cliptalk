@@ -1,0 +1,29 @@
+{
+    "stage": "transcribing",
+    "percent": 35,
+    "stages": [
+        {
+            "key": "uploaded",
+            "label": "Video diunggah",
+            "state": "done",
+            "meta": "342 MB"
+        },
+        {
+            "key": "transcribing",
+            "label": "Transkripsi dengan Faster-Whisper",
+            "state": "active",
+            "meta": "35%"
+        },
+        {
+            "key": "extracting",
+            "label": "Mencari bagian menarik",
+            "state": "pending"
+        },
+        {
+            "key": "ready",
+            "label": "Siap dipilih",
+            "state": "pending"
+        }
+    ],
+    "error": null
+}
