@@ -80,13 +80,24 @@ class ClipRenderService
             '+faststart',
         ];
 
+        // Center crop 9:16 lalu 1080×1920 (SYSTEM-DESIGN §6); min() menjaga sumber yang sudah vertikal.
         $videoFilters = [
-            'scale=1920:1080:force_original_aspect_ratio=decrease',
-            'pad=1920:1080:(ow-iw)/2:(oh-ih)/2',
+            "crop='min(iw,ih*9/16)':'min(ih,iw*16/9)'",
+            'scale=1080:1920',
+            'setsar=1',
         ];
 
         if ($clip->show_captions && $srt !== '') {
-            $videoFilters[] = 'subtitles=filename=subtitles.srt';
+            $disk->put(
+                "{$directory}/clip.ass",
+                $this->buildAss(
+                    $segments,
+                    (float) $clip->start_sec,
+                    (float) $clip->end_sec,
+                    (string) $clip->caption_style
+                )
+            );
+            $videoFilters[] = 'ass=clip.ass';
         }
 
         $command[] = '-vf';
@@ -107,7 +118,7 @@ class ClipRenderService
 
             throw new RuntimeException(
                 'FFmpeg gagal merender video: '
-                . mb_substr($message, 0, 1500)
+                .mb_substr($message, 0, 1500)
             );
         }
 
@@ -200,8 +211,8 @@ class ClipRenderService
         foreach ($entries as $index => $entry) {
             $output[] = (string) ($index + 1);
             $output[] = $this->formatSrtTime($entry['start'])
-                . ' --> '
-                . $this->formatSrtTime($entry['end']);
+                .' --> '
+                .$this->formatSrtTime($entry['end']);
             $output[] = str_replace(
                 ["\r\n", "\r"],
                 "\n",
@@ -211,6 +222,126 @@ class ClipRenderService
         }
 
         return implode("\n", $output);
+    }
+
+    /**
+     * Subtitle ASS untuk dibakar ke video 1080×1920 (SYSTEM-DESIGN §6):
+     * Geist 700 ukuran 64, maks 2 baris dan ~32 karakter per baris, gaya outline atau latar gelap.
+     *
+     * @param  array<int, mixed>  $segments
+     */
+    public function buildAss(
+        array $segments,
+        float $clipStart,
+        float $clipEnd,
+        string $style
+    ): string {
+        // Warna ASS &HAABBGGRR; alpha 48 ≈ 72% buram, sama dengan token caption-plate.
+        $border = $style === 'plate'
+            ? '&H48000000,&H48000000,-1,0,0,0,100,100,0,0,3,14,0'
+            : '&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,3,0';
+
+        $lines = [
+            '[Script Info]',
+            'ScriptType: v4.00+',
+            'PlayResX: 1080',
+            'PlayResY: 1920',
+            'WrapStyle: 2',
+            'ScaledBorderAndShadow: yes',
+            '',
+            '[V4+ Styles]',
+            'Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding',
+            "Style: Default,Geist,64,&H00FFFFFF,&H00FFFFFF,{$border},2,76,76,420,1",
+            '',
+            '[Events]',
+            'Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text',
+        ];
+
+        foreach ($segments as $segment) {
+            if (! is_array($segment) || ! isset($segment['start'], $segment['end'], $segment['text'])) {
+                continue;
+            }
+
+            $start = max((float) $segment['start'], $clipStart);
+            $end = min((float) $segment['end'], $clipEnd);
+            // Kurung kurawal adalah tag override ASS, jadi dibuang dari teks.
+            $text = trim(str_replace(['{', '}', "\n", "\r"], ['', '', ' ', ' '], (string) $segment['text']));
+
+            if ($end <= $start || $text === '') {
+                continue;
+            }
+
+            // shortcut: belum ada word timestamps, jadi waktu potongan dibagi sebanding jumlah karakter; pakai words dari Whisper setelah TASK 6.3.
+            $chunks = $this->chunkCaption($text);
+            $totalChars = array_sum(array_map(fn (array $chunk) => mb_strlen(implode(' ', $chunk)), $chunks));
+            $cursor = $start;
+
+            foreach ($chunks as $chunk) {
+                $share = ($end - $start) * mb_strlen(implode(' ', $chunk)) / max($totalChars, 1);
+                $lines[] = sprintf(
+                    'Dialogue: 0,%s,%s,Default,,0,0,0,,%s',
+                    $this->formatAssTime($cursor - $clipStart),
+                    $this->formatAssTime($cursor + $share - $clipStart),
+                    implode('\\N', $chunk)
+                );
+                $cursor += $share;
+            }
+        }
+
+        return implode("\n", $lines)."\n";
+    }
+
+    /**
+     * Pecah teks menjadi potongan berisi maks 2 baris, masing-masing ~32 karakter.
+     *
+     * @return list<list<string>>
+     */
+    private function chunkCaption(string $text, int $maxChars = 32, int $maxLines = 2): array
+    {
+        $chunks = [];
+        $lines = [];
+        $line = '';
+
+        foreach (preg_split('/\s+/u', $text) as $word) {
+            $candidate = $line === '' ? $word : "{$line} {$word}";
+
+            if ($line === '' || mb_strlen($candidate) <= $maxChars) {
+                $line = $candidate;
+
+                continue;
+            }
+
+            $lines[] = $line;
+            $line = $word;
+
+            if (count($lines) === $maxLines) {
+                $chunks[] = $lines;
+                $lines = [];
+            }
+        }
+
+        if ($line !== '') {
+            $lines[] = $line;
+        }
+
+        if ($lines !== []) {
+            $chunks[] = $lines;
+        }
+
+        return $chunks;
+    }
+
+    private function formatAssTime(float $seconds): string
+    {
+        $centiseconds = (int) round(max(0, $seconds) * 100);
+
+        return sprintf(
+            '%d:%02d:%02d.%02d',
+            intdiv($centiseconds, 360_000),
+            intdiv($centiseconds % 360_000, 6_000),
+            intdiv($centiseconds % 6_000, 100),
+            $centiseconds % 100
+        );
     }
 
     private function formatSrtTime(float $seconds): string
