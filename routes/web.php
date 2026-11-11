@@ -30,21 +30,23 @@ Route::get('/clips/{clip}/download/subtitle', [ClipController::class, 'downloadS
 
 Route::get('/clips/{clip}/play', [ClipController::class, 'playVideo'])->name('clips.play.video');
 
+// Video sumber untuk pemutar di halaman Pilih bagian dan Pratinjau.
+Route::get('/projects/{project}/video', function (string $project) {
+    $record = Project::findOrFail($project);
+    $path = $record->file_path;
+    $disk = Storage::disk('local');
+
+    abort_unless($disk->exists($path), 404);
+
+    return response()->file($disk->path($path), [
+        'Content-Type' => $record->mime_type,
+        'Content-Disposition' => 'inline; filename="'.
+            addslashes(basename($record->file_name)).'"',
+        'Cache-Control' => 'private, no-store',
+        'X-Content-Type-Options' => 'nosniff',
+    ]);
+})->name('projects.video');
+
 if (app()->isLocal()) {
-    Route::get('/projects/{project}/video', function (string $project) {
-        $record = Project::findOrFail($project);
-        $path = $record->file_path;
-        $disk = Storage::disk('local');
-
-        abort_unless($disk->exists($path), 404);
-
-        return response()->file($disk->path($path), [
-            'Content-Type' => $record->mime_type,
-            'Content-Disposition' => 'inline; filename="'.
-                addslashes(basename($record->file_name)).'"',
-            'Cache-Control' => 'private, no-store',
-            'X-Content-Type-Options' => 'nosniff',
-        ]);
-    })->name('projects.video');
     Route::inertia('/_design', 'design')->name('design');
 }
