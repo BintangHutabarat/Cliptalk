@@ -2,21 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Str;
+use App\Jobs\TranscribeProject;
 use App\Models\Project;
+use App\Services\TranscriptionService;
+use App\Services\VideoMetadataService;
+use App\Support\MockData;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
-use App\Services\VideoMetadataService;
-use Illuminate\Validation\ValidationException;
-use App\Jobs\TranscribeProject;
 
 class ProjectController extends Controller
 {
-    public function store(Request $request,VideoMetadataService $metadataService): RedirectResponse
+    public function store(Request $request, VideoMetadataService $metadataService): RedirectResponse
     {
         $validated = $request->validate([
             'video' => [
@@ -44,7 +46,6 @@ class ProjectController extends Controller
                 'video' => 'Video tidak dapat dibaca. Pastikan file valid dan FFprobe tersedia.',
             ]);
         }
-
 
         $project = new Project([
             'file_name' => $file->getClientOriginalName(),
@@ -117,7 +118,7 @@ class ProjectController extends Controller
                         'key' => 'uploaded',
                         'label' => 'Video diunggah',
                         'state' => 'done',
-                        'meta' => round($record->size_bytes / 1024 / 1024) . ' MB',
+                        'meta' => round($record->size_bytes / 1024 / 1024).' MB',
                     ],
                     [
                         'key' => 'transcribing',
@@ -203,15 +204,14 @@ class ProjectController extends Controller
         ]);
     }
 
-
     public function segments(string $project): Response
     {
         // Pertahankan halaman demo.
         if ($project === 'demo') {
             return Inertia::render('projects/segments', [
-                'project' => \App\Support\MockData::project($project),
-                'transcript' => \App\Support\MockData::get('transcript'),
-                'candidates' => \App\Support\MockData::get('candidates'),
+                'project' => MockData::project($project),
+                'transcript' => MockData::get('transcript'),
+                'candidates' => MockData::get('candidates'),
             ]);
         }
 
@@ -251,26 +251,7 @@ class ProjectController extends Controller
 
         abort_unless(is_array($rawSegments), 500, 'Format transkrip tidak valid.');
 
-        $transcript = [];
-
-        foreach (array_values($rawSegments) as $index => $segment) {
-            if (
-                ! is_array($segment)
-                || ! isset($segment['start'], $segment['end'], $segment['text'])
-            ) {
-                continue;
-            }
-
-            $transcript[] = [
-                'id' => $index + 1,
-                'start' => (float) $segment['start'],
-                'end' => (float) $segment['end'],
-                'text' => (string) $segment['text'],
-                'speaker' => null,
-                'avgLogprob' => 0,
-                'words' => [],
-            ];
-        }
+        $transcript = TranscriptionService::toTranscriptSegments($rawSegments);
 
         $candidates = json_decode(
             $disk->get($candidatePath),
@@ -303,5 +284,4 @@ class ProjectController extends Controller
             'candidates' => $candidates,
         ]);
     }
-
 }

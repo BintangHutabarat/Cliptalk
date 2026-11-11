@@ -73,4 +73,23 @@ class ClipRenderServiceTest extends TestCase
 
         $this->assertSame(['Dialogue: 0,0:00:00.00,0:00:02.00,Default,,0,0,0,,Halo \b1dunia'], $events);
     }
+
+    public function test_word_timestamps_drive_caption_timing(): void
+    {
+        // Dua kata panjang per baris, jadi potongan pertama berisi 4 kata dan kata ke-5 pindah potongan.
+        $texts = ['Perkembangan', ' teknologinya', ' mempercepat', ' pekerjaannya', ' sekarang.'];
+        $words = [];
+        foreach ($texts as $i => $text) {
+            $words[] = ['start' => 10 + $i * 2, 'end' => 11 + $i * 2, 'text' => $text, 'probability' => 0.9];
+        }
+        $segment = ['start' => 10, 'end' => 30, 'text' => trim(implode('', $texts)), 'words' => $words];
+
+        $events = $this->dialogues((new ClipRenderService)->buildAss([$segment], 10, 30, 'outline'));
+
+        // Potongan berakhir saat kata terakhirnya selesai (detik 17), bukan dibagi rata sepanjang segmen.
+        $this->assertSame([
+            'Dialogue: 0,0:00:00.00,0:00:07.00,Default,,0,0,0,,Perkembangan teknologinya\Nmempercepat pekerjaannya',
+            'Dialogue: 0,0:00:08.00,0:00:09.00,Default,,0,0,0,,sekarang.',
+        ], $events);
+    }
 }

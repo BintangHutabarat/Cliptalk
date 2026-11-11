@@ -9,15 +9,14 @@ class CandidateGenerationService
      *
      * Skor adalah heuristik awal, bukan prediksi viralitas.
      *
-     * @param array<int, array<string, mixed>> $segments
+     * @param  array<int, array<string, mixed>>  $segments
      * @return array<int, array<string, mixed>>
      */
     public function generate(array $segments, int $targetDuration, string $projectId): array
     {
         $segments = array_values(array_filter(
             $segments,
-            fn (array $segment): bool =>
-                isset($segment['start'], $segment['end'], $segment['text'])
+            fn (array $segment): bool => isset($segment['start'], $segment['end'], $segment['text'])
                 && is_numeric($segment['start'])
                 && is_numeric($segment['end'])
                 && (float) $segment['end'] > (float) $segment['start']
@@ -32,24 +31,9 @@ class CandidateGenerationService
         $count = count($segments);
         $target = max(1, $targetDuration);
 
-        // Mulai dari beberapa titik berbeda di sepanjang video.
-        $step = max(1, (int) floor($target * 0.75));
-        $lastStart = max(0, (float) $segments[$count - 1]['end'] - $target);
-
-        for ($desiredStart = 0; $desiredStart <= $lastStart; $desiredStart += $step) {
-            $startIndex = null;
-
-            foreach ($segments as $index => $segment) {
-                if ((float) $segment['start'] >= $desiredStart) {
-                    $startIndex = $index;
-                    break;
-                }
-            }
-
-            if ($startIndex === null) {
-                continue;
-            }
-
+        // Coba jendela dari setiap awal segmen, supaya setelah yang terbaik dipilih
+        // masih ada jendela lain yang tidak tumpang-tindih dengannya.
+        for ($startIndex = 0; $startIndex < $count; $startIndex++) {
             $start = (float) $segments[$startIndex]['start'];
             $endIndex = $startIndex;
 
@@ -80,7 +64,7 @@ class CandidateGenerationService
             $score = $this->score($text, $duration, $target);
 
             $candidate = [
-                'id' => 'candidate-' . ($startIndex + 1),
+                'id' => 'candidate-'.($startIndex + 1),
                 'projectId' => $projectId,
                 'title' => $this->title($text),
                 'start' => $start,
@@ -96,20 +80,30 @@ class CandidateGenerationService
             $candidates[] = $candidate;
         }
 
-        // Hapus kandidat dengan rentang yang sama.
-        $unique = [];
-
-        foreach ($candidates as $candidate) {
-            $key = $candidate['start'] . '-' . $candidate['end'];
-            $unique[$key] ??= $candidate;
-        }
-
+        // Skor tertinggi dulu; skor sama diurutkan dari yang paling awal supaya hasilnya stabil.
         usort(
-            $unique,
-            fn (array $a, array $b): int => $b['score'] <=> $a['score']
+            $candidates,
+            fn (array $a, array $b): int => [$b['score'], $a['start']] <=> [$a['score'], $b['start']]
         );
 
-        return array_values(array_slice($unique, 0, 5));
+        // Ambil maksimal 5 kandidat yang tidak saling tumpang-tindih (SYSTEM-DESIGN.md §6).
+        $selected = [];
+
+        foreach ($candidates as $candidate) {
+            foreach ($selected as $chosen) {
+                if ($candidate['start'] < $chosen['end'] && $chosen['start'] < $candidate['end']) {
+                    continue 2;
+                }
+            }
+
+            $selected[] = $candidate;
+
+            if (count($selected) === 5) {
+                break;
+            }
+        }
+
+        return $selected;
     }
 
     private function score(string $text, float $duration, int $target): int

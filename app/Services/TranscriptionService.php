@@ -10,6 +10,49 @@ use Symfony\Component\Process\Process;
 class TranscriptionService
 {
     /**
+     * Ubah segmen dari transcript.json menjadi bentuk TranscriptSegment (SYSTEM-DESIGN.md §4).
+     * Id = urutan di file, jadi tetap sama walau halaman hanya menampilkan sebagian segmen.
+     *
+     * @param  array<int, mixed>  $rawSegments
+     * @return list<array{id: int, start: float, end: float, text: string, speaker: null, avgLogprob: float, words: list<array{start: float, end: float, text: string, probability: float}>}>
+     */
+    public static function toTranscriptSegments(array $rawSegments): array
+    {
+        $segments = [];
+
+        foreach (array_values($rawSegments) as $index => $segment) {
+            if (! is_array($segment) || ! isset($segment['start'], $segment['end'], $segment['text'])) {
+                continue;
+            }
+
+            $words = [];
+            foreach (is_array($segment['words'] ?? null) ? $segment['words'] : [] as $word) {
+                if (is_array($word) && isset($word['start'], $word['end'], $word['text'])) {
+                    $words[] = [
+                        'start' => (float) $word['start'],
+                        'end' => (float) $word['end'],
+                        'text' => (string) $word['text'],
+                        'probability' => (float) ($word['probability'] ?? 1),
+                    ];
+                }
+            }
+
+            $segments[] = [
+                'id' => $index + 1,
+                'start' => (float) $segment['start'],
+                'end' => (float) $segment['end'],
+                'text' => (string) $segment['text'],
+                'speaker' => null,
+                // Transkrip lama tanpa avg_logprob dianggap yakin (0), jadi tidak diberi penanda.
+                'avgLogprob' => (float) ($segment['avg_logprob'] ?? 0),
+                'words' => $words,
+            ];
+        }
+
+        return $segments;
+    }
+
+    /**
      * Jalankan Faster-Whisper dan kembalikan lokasi JSON
      * relatif terhadap local storage.
      */

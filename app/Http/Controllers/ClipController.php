@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Clip;
 use App\Models\Project;
 use App\Services\ClipRenderService;
+use App\Services\TranscriptionService;
 use App\Support\MockData;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -159,32 +160,11 @@ class ClipController extends Controller
                 JSON_THROW_ON_ERROR
             );
 
-            foreach (($data['segments'] ?? []) as $index => $segment) {
-                if (! isset($segment['start'], $segment['end'], $segment['text'])) {
-                    continue;
-                }
-
-                $segmentStart = (float) $segment['start'];
-                $segmentEnd = (float) $segment['end'];
-
-                // Ambil hanya segmen yang bersinggungan dengan klip.
-                if (
-                    $segmentEnd <= $record->start_sec
-                    || $segmentStart >= $record->end_sec
-                ) {
-                    continue;
-                }
-
-                $transcript[] = [
-                    'id' => $index + 1,
-                    'start' => $segmentStart,
-                    'end' => $segmentEnd,
-                    'text' => (string) $segment['text'],
-                    'speaker' => null,
-                    'avgLogprob' => 0,
-                    'words' => [],
-                ];
-            }
+            // Ambil hanya segmen yang bersinggungan dengan klip.
+            $transcript = array_values(array_filter(
+                TranscriptionService::toTranscriptSegments(is_array($data['segments'] ?? null) ? $data['segments'] : []),
+                fn (array $segment) => $segment['end'] > $record->start_sec && $segment['start'] < $record->end_sec
+            ));
         }
 
         return Inertia::render('clips/preview', [
