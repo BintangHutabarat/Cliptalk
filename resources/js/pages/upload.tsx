@@ -1,7 +1,7 @@
 
 import { Head, router } from '@inertiajs/react';
 import { CircleX, Info } from 'lucide-react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { Dropzone } from '@/components/cliptalk/dropzone';
 import { FileRow } from '@/components/cliptalk/file-row';
@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { ClipFlowLayout } from '@/layouts/clip-flow-layout';
+import { ChunkUploadError, uploadInChunks } from '@/lib/chunk-upload';
 import { copy } from '@/lib/copy';
 import { routes } from '@/lib/routes';
 import type { ClipDuration } from '@/types/cliptalk';
@@ -61,6 +62,9 @@ export default function Upload({ limits, durations }: UploadProps) {
 
     const busy = submitting;
 
+    // Id unggahan untuk file yang dipilih, supaya klik Mulai berikutnya melanjutkan, bukan mengulang.
+    const pendingUpload = useRef<{ file: File; id: string } | null>(null);
+
     const chooseFile = async (file: File) => {
         setError(null);
         setSelected({ file, durationSec: null });
@@ -72,40 +76,41 @@ export default function Upload({ limits, durations }: UploadProps) {
         );
     };
 
-    const startUpload = () => {
+    const startUpload = async () => {
         if (!selected || busy) return;
+
+        const { file, durationSec } = selected;
 
         setError(null);
         setSubmitting(true);
         setUploadProgress(0);
 
+        let uploadId: string;
+
+        try {
+            uploadId = await uploadInChunks(file, {
+                uploadId: pendingUpload.current?.file === file ? pendingUpload.current.id : null,
+                onUploadId: (id) => {
+                    pendingUpload.current = { file, id };
+                },
+                onProgress: setUploadProgress,
+            });
+        } catch (uploadError) {
+            setError(uploadError instanceof ChunkUploadError && uploadError.serverMessage ? uploadError.serverMessage : copy.upload.interrupted);
+            setSubmitting(false);
+            setUploadProgress(null);
+            return;
+        }
+
         router.post(
             routes.projects.store(),
+            { uploadId, targetDuration, durationSec: durationSec ?? undefined },
             {
-                video: selected.file,
-                targetDuration,
-                durationSec: selected.durationSec ?? undefined,
-            },
-            {
-                forceFormData: true,
-
-                onProgress: (event) => {
-                    if (event?.percentage != null) {
-                        setUploadProgress(event.percentage);
-                    }
-                },
-
                 onError: (errors) => {
-                    const firstError = Object.values(errors)[0];
-
-                    setError(
-                        String(
-                            firstError ??
-                                'Upload gagal. Periksa file dan coba kembali.',
-                        ),
-                    );
+                    // Unggahan yang ditolak server sudah dihapus; pilihan berikutnya harus mulai dari awal.
+                    pendingUpload.current = null;
+                    setError(String(Object.values(errors)[0] ?? copy.upload.interrupted));
                 },
-
                 onFinish: () => {
                     setSubmitting(false);
                     setUploadProgress(null);

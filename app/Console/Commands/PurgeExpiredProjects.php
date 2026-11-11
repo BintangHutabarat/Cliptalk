@@ -32,7 +32,20 @@ class PurgeExpiredProjects extends Command
                 $deleted++;
             });
 
+        // Unggahan yang ditinggalkan: hapus 24 jam setelah bagian terakhir masuk.
+        $abandoned = 0;
+
+        foreach ($disk->directories('uploads') as $directory) {
+            $part = "{$directory}/source.part";
+
+            if (! $disk->exists($part) || $disk->lastModified($part) < $cutoff->getTimestamp()) {
+                $disk->deleteDirectory($directory);
+                $abandoned++;
+            }
+        }
+
         $this->info("Project kedaluwarsa dihapus: {$deleted}");
+        $this->info("Unggahan terbengkalai dihapus: {$abandoned}");
 
         return self::SUCCESS;
     }

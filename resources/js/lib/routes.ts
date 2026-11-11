@@ -1,6 +1,11 @@
 // shortcut: path ditulis manual mengikuti nama route di routes/web.php; ganti dengan Wayfinder atau Ziggy (RULE.md §6) begitu dipasang.
 export const routes = {
     upload: () => '/',
+    uploads: {
+        store: () => '/uploads',
+        show: (upload: string) => `/uploads/${upload}`,
+        chunks: (upload: string) => `/uploads/${upload}/chunks`,
+    },
     projects: {
         store: () => '/projects',
         processing: (project: string) => `/projects/${project}/processing`,

@@ -46,6 +46,7 @@ export const copy = {
         dropHint: 'MP4, MOV, atau WebM. Maksimal 2 GB.',
         uploading: 'Mengunggah…',
         uploadingLabel: 'Progres unggahan',
+        interrupted: 'Unggahan terputus. Periksa koneksi internet, lalu klik Mulai untuk melanjutkan dari bagian terakhir.',
         removeFile: (name: string) => `Hapus ${name}`,
         durationTitle: 'Durasi klip',
         durationDescription: 'Target panjang tiap klip.',

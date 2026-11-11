@@ -4,12 +4,10 @@ namespace Tests\Feature;
 
 use App\Models\Project;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
-use App\Services\VideoMetadataService;
-use Illuminate\Support\Facades\Bus;
 
 class CliptalkPagesTest extends TestCase
 {
@@ -24,7 +22,6 @@ class CliptalkPagesTest extends TestCase
             ->where('durations', [30, 60, 90])
         );
     }
-
 
     public function test_processing_page_sends_project_and_status(): void
     {
@@ -47,7 +44,6 @@ class CliptalkPagesTest extends TestCase
                 ->has('status.stages', 4)
             );
     }
-
 
     public function test_segments_page_sends_transcript_and_candidates(): void
     {
@@ -82,70 +78,18 @@ class CliptalkPagesTest extends TestCase
         );
     }
 
-
-
     public function test_upload_requires_a_supported_target_duration(): void
     {
         Bus::fake();
         Storage::fake('local');
 
-        // Durasi yang tidak didukung harus ditolak oleh validasi.
         $this->post(route('projects.store'), [
-            'video' => UploadedFile::fake()->create(
-                'podcast.mp4',
-                100,
-                'video/mp4'
-            ),
+            'uploadId' => '00000000-0000-4000-8000-000000000000',
             'targetDuration' => 45,
         ])->assertSessionHasErrors('targetDuration');
 
-        // Simulasikan hasil FFprobe untuk file video pengujian.
-        $this->mock(
-            VideoMetadataService::class,
-            function ($mock) {
-                $mock->shouldReceive('inspect')
-                    ->once()
-                    ->andReturn([
-                        'codec' => 'h264',
-                        'width' => 1920,
-                        'height' => 1080,
-                        'fps' => 29.97,
-                        'duration_sec' => 173,
-                    ]);
-            }
-        );
-
-        // Durasi yang didukung harus berhasil diproses.
-        $this->post(route('projects.store'), [
-            'video' => UploadedFile::fake()->create(
-                'podcast.mp4',
-                100,
-                'video/mp4'
-            ),
-            'targetDuration' => 60,
-        ])->assertSessionHasNoErrors();
-
-        $project = Project::query()->firstOrFail();
-
-        $this->assertSame(60, $project->target_duration);
-        $this->assertSame(173, $project->duration_sec);
-        $this->assertSame(1920, $project->width);
-        $this->assertSame(1080, $project->height);
-
-        $this->assertStringStartsWith(
-            "projects/{$project->id}/",
-            $project->file_path
-        );
-
-        Storage::disk('local')->assertExists($project->file_path);
-
-        $this->assertDatabaseHas('projects', [
-            'id' => $project->id,
-            'target_duration' => 60,
-        ]);
+        Bus::assertNothingDispatched();
     }
-
-
 
     public function test_choosing_a_candidate_carries_its_range_to_the_preview(): void
     {

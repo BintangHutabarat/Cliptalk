@@ -8,7 +8,6 @@ use App\Models\Clip;
 use App\Models\Project;
 use App\Services\TranscriptionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
@@ -149,17 +148,15 @@ class ScenarioTest extends TestCase
     {
         Queue::fake();
 
-        $this->post(route('projects.store'), [
-            'video' => UploadedFile::fake()->createWithContent('catatan.txt', 'bukan video'),
-            'targetDuration' => 60,
-        ])->assertSessionHasErrors('video');
+        $this->postJson(route('uploads.store'), ['fileName' => 'catatan.txt', 'sizeBytes' => 11, 'mimeType' => 'text/plain'])
+            ->assertJsonValidationErrors('mimeType');
 
         $this->assertSame(0, Project::count());
 
-        $this->post(route('projects.store'), [
-            'video' => new UploadedFile($this->sampleVideoPath(), 'podcast.mp4', 'video/mp4', null, true),
-            'targetDuration' => 60,
-        ])->assertSessionHasNoErrors();
+        $uploadId = $this->uploadInChunks(file_get_contents($this->sampleVideoPath()), chunkBytes: 256 * 1024);
+
+        $this->post(route('projects.store'), ['uploadId' => $uploadId, 'targetDuration' => 60])
+            ->assertSessionHasNoErrors();
 
         $project = Project::firstOrFail();
 

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ChunkUploadController;
 use App\Http\Controllers\ClipController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\UploadController;
@@ -12,6 +13,12 @@ Route::pattern('project', 'demo|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-
 Route::pattern('clip', 'demo|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}');
 
 Route::get('/', UploadController::class)->name('upload');
+
+Route::pattern('upload', '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}');
+
+Route::post('/uploads', [ChunkUploadController::class, 'store'])->name('uploads.store');
+Route::get('/uploads/{upload}', [ChunkUploadController::class, 'show'])->name('uploads.show');
+Route::post('/uploads/{upload}/chunks', [ChunkUploadController::class, 'append'])->name('uploads.chunks');
 
 Route::post('/projects', [ProjectController::class, 'store'])->name('projects.store');
 Route::get('/projects/{project}/processing', [ProjectController::class, 'processing'])->name('projects.processing');

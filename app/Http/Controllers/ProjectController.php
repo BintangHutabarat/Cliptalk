@@ -19,15 +19,13 @@ use Inertia\Response;
 
 class ProjectController extends Controller
 {
+    /**
+     * Buat project dari unggahan per bagian yang sudah lengkap (lihat ChunkUploadController).
+     */
     public function store(Request $request, VideoMetadataService $metadataService): RedirectResponse
     {
         $validated = $request->validate([
-            'video' => [
-                'required',
-                'file',
-                'max:2097152',
-                'mimetypes:video/mp4,video/quicktime,video/webm',
-            ],
+            'uploadId' => ['required', 'uuid'],
             'targetDuration' => [
                 'required',
                 'integer',
@@ -36,22 +34,50 @@ class ProjectController extends Controller
             'durationSec' => ['nullable', 'numeric', 'min:0'],
         ]);
 
-        $file = $request->file('video');
+        $uploadId = $validated['uploadId'];
+        $meta = ChunkUploadController::meta($uploadId);
 
-        try {
-            $metadata = $metadataService->inspect($file->getRealPath());
-        } catch (\Throwable $exception) {
-            report($exception);
+        if ($meta === null) {
+            throw ValidationException::withMessages([
+                'video' => 'Unggahan tidak ditemukan atau sudah kedaluwarsa. Pilih video lagi, lalu klik Mulai.',
+            ]);
+        }
+
+        $disk = Storage::disk('local');
+        $partPath = ChunkUploadController::partPath($uploadId);
+
+        if ($disk->size($partPath) !== $meta['sizeBytes']) {
+            throw ValidationException::withMessages([
+                'video' => 'Unggahan belum lengkap. Klik Mulai untuk melanjutkan dari bagian terakhir.',
+            ]);
+        }
+
+        // Tipe dibaca dari isi file, bukan dari nama atau tipe yang dikirim browser.
+        $mimeType = (new \finfo(FILEINFO_MIME_TYPE))->file($disk->path($partPath));
+
+        if (! isset(UploadController::EXTENSIONS[$mimeType])) {
+            $disk->deleteDirectory("uploads/{$uploadId}");
 
             throw ValidationException::withMessages([
-                'video' => 'Video tidak dapat dibaca. Pastikan file valid dan FFprobe tersedia.',
+                'video' => 'Format file tidak didukung. Unggah video MP4, MOV, atau WebM.',
+            ]);
+        }
+
+        try {
+            $metadata = $metadataService->inspect($disk->path($partPath));
+        } catch (\Throwable $exception) {
+            report($exception);
+            $disk->deleteDirectory("uploads/{$uploadId}");
+
+            throw ValidationException::withMessages([
+                'video' => 'Video tidak dapat dibaca. Pastikan file tidak rusak dengan memutarnya di komputer, lalu unggah lagi.',
             ]);
         }
 
         $project = new Project([
-            'file_name' => $file->getClientOriginalName(),
-            'mime_type' => $file->getMimeType() ?: 'application/octet-stream',
-            'size_bytes' => $file->getSize(),
+            'file_name' => mb_substr($meta['fileName'], 0, 255),
+            'mime_type' => $mimeType,
+            'size_bytes' => $meta['sizeBytes'],
             'target_duration' => (int) $validated['targetDuration'],
             'duration_sec' => $metadata['duration_sec'],
             'width' => $metadata['width'],
@@ -62,19 +88,15 @@ class ProjectController extends Controller
 
         // Buat UUID sebelum menentukan lokasi penyimpanan video.
         $project->id = (string) Str::uuid();
+        $project->file_path = "projects/{$project->id}/source.".UploadController::EXTENSIONS[$mimeType];
 
-        $path = $file->store("projects/{$project->id}", 'local');
-
-        if ($path === false) {
-            abort(500, 'Video gagal disimpan. Silakan coba kembali.');
-        }
-
-        $project->file_path = $path;
+        $disk->move($partPath, $project->file_path);
+        $disk->deleteDirectory("uploads/{$uploadId}");
 
         try {
             $project->save();
         } catch (\Throwable $exception) {
-            Storage::disk('local')->delete($path);
+            $disk->deleteDirectory("projects/{$project->id}");
 
             throw $exception;
         }
