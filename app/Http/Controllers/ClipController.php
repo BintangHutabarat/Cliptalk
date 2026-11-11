@@ -4,15 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\Clip;
 use App\Models\Project;
+use App\Services\ClipRenderService;
 use App\Support\MockData;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
-use App\Services\ClipRenderService;
-use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class ClipController extends Controller
@@ -193,7 +194,6 @@ class ClipController extends Controller
         ]);
     }
 
-
     public function render(
         Request $request,
         string $clip
@@ -274,7 +274,6 @@ class ClipController extends Controller
         }
     }
 
-
     public function show(string $clip): Response
     {
         if ($clip === MockData::DEMO_ID) {
@@ -343,10 +342,7 @@ class ClipController extends Controller
             'Video hasil render tidak ditemukan.'
         );
 
-        return $disk->download(
-            $record->output_path,
-            'clip-' . $record->id . '.mp4'
-        );
+        return $disk->download($record->output_path, $this->downloadName($record, 'mp4'));
     }
 
     public function downloadSubtitle(string $clip)
@@ -362,12 +358,16 @@ class ClipController extends Controller
             'File subtitle tidak ditemukan.'
         );
 
-        return $disk->download(
-            $record->subtitle_path,
-            'clip-' . $record->id . '.srt'
-        );
+        return $disk->download($record->subtitle_path, $this->downloadName($record, 'srt'));
     }
 
+    /**
+     * Sama dengan nama yang tampil di halaman unduh: cliptalk_<slug judul>.<ext> (TASK 4.5).
+     */
+    private function downloadName(Clip $clip, string $extension): string
+    {
+        return 'cliptalk_'.(Str::slug($clip->title) ?: 'klip').".{$extension}";
+    }
 
     private function projectData(Project $project): array
     {
@@ -392,7 +392,6 @@ class ClipController extends Controller
                 ->toISOString(),
         ];
     }
-
 
     private function clipData(Clip $clip): array
     {
@@ -443,6 +442,4 @@ class ClipController extends Controller
                 ->toISOString(),
         ];
     }
-
-
 }
