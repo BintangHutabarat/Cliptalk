@@ -36,6 +36,7 @@ def main():
         language="id",
         beam_size=5,
         vad_filter=True,
+        word_timestamps=True,
     )
 
     results = []
@@ -47,6 +48,18 @@ def main():
             "start": round(float(segment.start), 3),
             "end": round(float(segment.end), 3),
             "text": segment.text.strip(),
+            # Keyakinan ASR untuk penanda "Kurang yakin" (SYSTEM-DESIGN.md §4).
+            "avg_logprob": round(float(segment.avg_logprob), 4),
+            # Waktu per kata untuk subtitle; teks kata dari Whisper diawali spasi.
+            "words": [
+                {
+                    "start": round(float(word.start), 3),
+                    "end": round(float(word.end), 3),
+                    "text": word.word,
+                    "probability": round(float(word.probability), 4),
+                }
+                for word in (segment.words or [])
+            ],
         }
         results.append(item)
         print(

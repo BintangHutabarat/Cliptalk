@@ -45,6 +45,9 @@ export default function Preview({ project, clip, transcript }: PreviewProps) {
     const words = useMemo(
         () =>
             transcript.flatMap((segment) => {
+                // Waktu kata asli dari Faster-Whisper; perkiraan rata hanya untuk transkrip lama tanpa words.
+                if (segment.words.length > 0) return segment.words;
+
                 const tokens = segment.text.trim().split(/\s+/).filter(Boolean);
                 if (tokens.length === 0) return [];
 

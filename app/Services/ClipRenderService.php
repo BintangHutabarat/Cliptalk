@@ -262,29 +262,20 @@ class ClipRenderService
                 continue;
             }
 
-            $start = max((float) $segment['start'], $clipStart);
-            $end = min((float) $segment['end'], $clipEnd);
-            // Kurung kurawal adalah tag override ASS, jadi dibuang dari teks.
-            $text = trim(str_replace(['{', '}', "\n", "\r"], ['', '', ' ', ' '], (string) $segment['text']));
+            foreach ($this->timedChunks($segment) as [$chunkStart, $chunkEnd, $chunkLines]) {
+                $start = max($chunkStart, $clipStart);
+                $end = min($chunkEnd, $clipEnd);
 
-            if ($end <= $start || $text === '') {
-                continue;
-            }
+                if ($end <= $start) {
+                    continue;
+                }
 
-            // shortcut: belum ada word timestamps, jadi waktu potongan dibagi sebanding jumlah karakter; pakai words dari Whisper setelah TASK 6.3.
-            $chunks = $this->chunkCaption($text);
-            $totalChars = array_sum(array_map(fn (array $chunk) => mb_strlen(implode(' ', $chunk)), $chunks));
-            $cursor = $start;
-
-            foreach ($chunks as $chunk) {
-                $share = ($end - $start) * mb_strlen(implode(' ', $chunk)) / max($totalChars, 1);
                 $lines[] = sprintf(
                     'Dialogue: 0,%s,%s,Default,,0,0,0,,%s',
-                    $this->formatAssTime($cursor - $clipStart),
-                    $this->formatAssTime($cursor + $share - $clipStart),
-                    implode('\\N', $chunk)
+                    $this->formatAssTime($start - $clipStart),
+                    $this->formatAssTime($end - $clipStart),
+                    implode('\\N', $chunkLines)
                 );
-                $cursor += $share;
             }
         }
 
@@ -292,32 +283,84 @@ class ClipRenderService
     }
 
     /**
-     * Pecah teks menjadi potongan berisi maks 2 baris, masing-masing ~32 karakter.
+     * Potongan subtitle sebuah segmen beserta waktunya. Dengan words dari Whisper, waktu potongan
+     * mengikuti kata pertama dan terakhirnya; tanpa words (transkrip lama), durasi segmen dibagi
+     * sebanding jumlah karakter.
      *
-     * @return list<list<string>>
+     * @param  array<string, mixed>  $segment
+     * @return list<array{0: float, 1: float, 2: list<string>}>
      */
-    private function chunkCaption(string $text, int $maxChars = 32, int $maxLines = 2): array
+    private function timedChunks(array $segment): array
+    {
+        // Kurung kurawal adalah tag override ASS, jadi dibuang dari teks.
+        $clean = fn (string $text) => trim(str_replace(['{', '}', "\n", "\r"], ['', '', ' ', ' '], $text));
+
+        $words = array_values(array_filter(
+            is_array($segment['words'] ?? null) ? $segment['words'] : [],
+            fn ($word) => is_array($word) && isset($word['start'], $word['end'], $word['text']) && $clean((string) $word['text']) !== ''
+        ));
+
+        if ($words !== []) {
+            $timed = [];
+            $index = 0;
+
+            foreach ($this->chunkCaption(array_map(fn (array $word) => $clean((string) $word['text']), $words)) as [$chunkLines, $count]) {
+                $timed[] = [(float) $words[$index]['start'], (float) $words[$index + $count - 1]['end'], $chunkLines];
+                $index += $count;
+            }
+
+            return $timed;
+        }
+
+        $tokens = preg_split('/\s+/u', $clean((string) $segment['text']), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        $chunks = $this->chunkCaption($tokens);
+        $start = (float) $segment['start'];
+        $length = (float) $segment['end'] - $start;
+        $totalChars = max(1, array_sum(array_map(fn (array $chunk) => mb_strlen(implode(' ', $chunk[0])), $chunks)));
+        $timed = [];
+
+        foreach ($chunks as [$chunkLines]) {
+            $share = $length * mb_strlen(implode(' ', $chunkLines)) / $totalChars;
+            $timed[] = [$start, $start + $share, $chunkLines];
+            $start += $share;
+        }
+
+        return $timed;
+    }
+
+    /**
+     * Susun kata menjadi potongan berisi maks 2 baris, masing-masing ~32 karakter.
+     *
+     * @param  list<string>  $tokens
+     * @return list<array{0: list<string>, 1: int}> baris-baris potongan dan jumlah kata di dalamnya
+     */
+    private function chunkCaption(array $tokens, int $maxChars = 32, int $maxLines = 2): array
     {
         $chunks = [];
         $lines = [];
         $line = '';
+        $count = 0;
 
-        foreach (preg_split('/\s+/u', $text) as $word) {
-            $candidate = $line === '' ? $word : "{$line} {$word}";
+        foreach ($tokens as $token) {
+            $candidate = $line === '' ? $token : "{$line} {$token}";
 
             if ($line === '' || mb_strlen($candidate) <= $maxChars) {
                 $line = $candidate;
+                $count++;
 
                 continue;
             }
 
             $lines[] = $line;
-            $line = $word;
+            $line = $token;
 
             if (count($lines) === $maxLines) {
-                $chunks[] = $lines;
+                $chunks[] = [$lines, $count];
                 $lines = [];
+                $count = 0;
             }
+
+            $count++;
         }
 
         if ($line !== '') {
@@ -325,7 +368,7 @@ class ClipRenderService
         }
 
         if ($lines !== []) {
-            $chunks[] = $lines;
+            $chunks[] = [$lines, $count];
         }
 
         return $chunks;
