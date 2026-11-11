@@ -397,7 +397,7 @@ class ClipController extends Controller
             'srtUrl' => $hasSubtitle
                 ? route('clips.download.subtitle', $clip->id)
                 : null,
-            'sha256' => null,
+            'sha256' => $clip->sha256,
             'error' => $clip->error,
             'expiresAt' => $clip->created_at
                 ->copy()

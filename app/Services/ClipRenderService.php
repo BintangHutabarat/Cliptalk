@@ -11,7 +11,7 @@ class ClipRenderService
 {
     /**
      * @param  (callable(int): void)|null  $onProgress  dipanggil dengan persen 0–99 selama FFmpeg berjalan
-     * @return array{output_path: string, subtitle_path: string|null, output_size_bytes: int}
+     * @return array{output_path: string, subtitle_path: string|null, output_size_bytes: int, sha256: string}
      */
     public function render(Clip $clip, ?callable $onProgress = null): array
     {
@@ -161,6 +161,7 @@ class ClipRenderService
                 ? $subtitleRelativePath
                 : null,
             'output_size_bytes' => $size,
+            'sha256' => hash_file('sha256', $disk->path($outputRelativePath)),
         ];
     }
 
