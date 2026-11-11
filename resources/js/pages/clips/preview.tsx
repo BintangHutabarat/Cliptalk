@@ -60,15 +60,21 @@ export default function Preview({ project, clip, transcript }: PreviewProps) {
         [transcript],
     );
 
+    // Klip berganti: reset waktu saat render (bukan di effect) supaya tidak ada render berantai.
+    const clipKey = `${clip.id}:${clip.start}`;
+    const [syncedClipKey, setSyncedClipKey] = useState(clipKey);
+    if (syncedClipKey !== clipKey) {
+        setSyncedClipKey(clipKey);
+        setTime(clip.start);
+        setPlaying(false);
+    }
+
     useEffect(() => {
         const video = videoRef.current;
 
         if (video && video.readyState >= 1) {
             video.currentTime = clip.start;
         }
-
-        setTime(clip.start);
-        setPlaying(false);
     }, [clip.start, clip.id]);
 
     const togglePlayback = () => {
