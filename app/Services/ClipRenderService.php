@@ -9,7 +9,11 @@ use RuntimeException;
 
 class ClipRenderService
 {
-    public function render(Clip $clip): array
+    /**
+     * @param  (callable(int): void)|null  $onProgress  dipanggil dengan persen 0–99 selama FFmpeg berjalan
+     * @return array{output_path: string, subtitle_path: string|null, output_size_bytes: int}
+     */
+    public function render(Clip $clip, ?callable $onProgress = null): array
     {
         $clip->loadMissing('project');
 
@@ -54,6 +58,9 @@ class ClipRenderService
             'ffmpeg',
             '-hide_banner',
             '-y',
+            '-nostats',
+            '-progress',
+            'pipe:1',
             '-ss',
             (string) $clip->start_sec,
             '-i',
@@ -105,9 +112,23 @@ class ClipRenderService
 
         $command[] = $disk->path($outputRelativePath);
 
+        $lastPercent = 0;
+
         $result = Process::path($workingDirectory)
             ->timeout(600)
-            ->run($command);
+            ->run($command, function (string $type, string $buffer) use (&$lastPercent, $duration, $onProgress): void {
+                // -progress menulis out_time_us (mikrodetik video yang sudah jadi) ke stdout.
+                if ($onProgress === null || ! preg_match_all('/out_time_us=(\d+)/', $buffer, $matches)) {
+                    return;
+                }
+
+                $percent = (int) min(99, floor(end($matches[1]) / 1_000_000 / $duration * 100));
+
+                if ($percent >= $lastPercent + 5) {
+                    $lastPercent = $percent;
+                    $onProgress($percent);
+                }
+            });
 
         if (! $result->successful()) {
             $message = trim($result->errorOutput());

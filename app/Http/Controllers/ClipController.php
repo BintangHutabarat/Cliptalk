@@ -2,20 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\RenderClip;
 use App\Models\Clip;
 use App\Models\Project;
-use App\Services\ClipRenderService;
 use App\Services\TranscriptionService;
 use App\Support\MockData;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
-use Throwable;
 
 class ClipController extends Controller
 {
@@ -210,9 +209,9 @@ class ClipController extends Controller
             ],
         ]);
 
-        if ($record->stage === 'processing') {
+        if (in_array($record->stage, ['queued', 'rendering'], true)) {
             return back()->withErrors([
-                'render' => 'Klip ini sedang diproses.',
+                'render' => 'Klip ini sedang dirender. Tunggu sampai selesai.',
             ]);
         }
 
@@ -220,38 +219,26 @@ class ClipController extends Controller
             'title' => trim($validated['title']),
             'show_captions' => (bool) $validated['showCaptions'],
             'caption_style' => $validated['captionStyle'],
-            'stage' => 'processing',
-            'progress' => 10,
+            'stage' => 'queued',
+            'progress' => 0,
             'error' => null,
         ]);
 
-        try {
-            $result = app(ClipRenderService::class)->render($record);
+        RenderClip::dispatch($record->id);
 
-            $record->update([
-                ...$result,
-                'stage' => 'ready',
-                'progress' => 100,
-                'error' => null,
-            ]);
+        // Halaman pratinjau memantau progres lewat clips.status lalu pindah ke halaman unduh.
+        return to_route('clips.preview', $record->id);
+    }
 
-            return to_route('clips.show', $record->id);
-        } catch (Throwable $exception) {
-            Log::error('Clip rendering failed.', [
-                'clip_id' => $record->id,
-                'exception' => $exception,
-            ]);
+    public function status(string $clip): JsonResponse
+    {
+        $record = Clip::findOrFail($clip);
 
-            $record->update([
-                'stage' => 'failed',
-                'progress' => 0,
-                'error' => mb_substr($exception->getMessage(), 0, 2000),
-            ]);
-
-            return back()->withErrors([
-                'render' => 'Render gagal. Periksa log Laravel untuk detailnya, lalu coba lagi.',
-            ]);
-        }
+        return response()->json([
+            'stage' => $record->stage,
+            'percent' => $record->progress,
+            'error' => $record->error,
+        ]);
     }
 
     public function show(string $clip): Response
@@ -405,10 +392,6 @@ class ClipController extends Controller
                 : null,
             'downloadUrl' => $hasVideo
                 ? route('clips.download.video', $clip->id)
-                : null,
-            'outputSizeBytes' => $clip->output_size_bytes,
-            'srtUrl' => $hasSubtitle
-                ? route('clips.download.subtitle', $clip->id)
                 : null,
             'outputSizeBytes' => $clip->output_size_bytes,
             'srtUrl' => $hasSubtitle

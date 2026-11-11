@@ -1,22 +1,24 @@
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
+import { CircleX } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { ClipFrame } from '@/components/cliptalk/clip-frame';
 import { PageHeading } from '@/components/cliptalk/page-heading';
 import { SettingRow } from '@/components/cliptalk/setting-row';
 import { SpecList } from '@/components/cliptalk/spec-list';
+import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Switch } from '@/components/ui/switch';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { useSimulatedProgress } from '@/hooks/use-simulated-progress';
+import { useJobPolling } from '@/hooks/use-job-polling';
 import { ClipFlowLayout } from '@/layouts/clip-flow-layout';
 import { copy } from '@/lib/copy';
 import { routes } from '@/lib/routes';
 import { formatDuration } from '@/lib/time';
-import type { CaptionStyle, Clip, Project, TranscriptSegment } from '@/types/cliptalk';
+import type { CaptionStyle, Clip, ClipStatus, Project, TranscriptSegment } from '@/types/cliptalk';
 
 type PreviewProps = {
     project: Project;
@@ -26,8 +28,7 @@ type PreviewProps = {
 };
 
 const TITLE_MAX = 60;
-const RENDER_SIMULATION_MS = 2500;
-
+const IDLE_STAGES = ['draft', 'ready', 'failed'] as const;
 
 export default function Preview({ project, clip, transcript }: PreviewProps) {
     const form = useForm({
@@ -111,18 +112,30 @@ export default function Preview({ project, clip, transcript }: PreviewProps) {
         setTime(Math.min(video.currentTime, clip.end));
     };
 
-    const render = useSimulatedProgress(RENDER_SIMULATION_MS, (reset) => {
-        form.post(routes.clips.render(clip.id), { onFinish: reset });
-    });
-    const busy = render.running || form.processing;
+    const { status } = useJobPolling<ClipStatus>(
+        { stage: clip.stage, percent: clip.progress, error: clip.error },
+        routes.clips.status(clip.id),
+        IDLE_STAGES,
+    );
+    const rendering = status.stage === 'queued' || status.stage === 'rendering';
+    const busy = rendering || form.processing;
+
+    // `clip.stage` masih stage saat halaman dimuat, jadi perbedaan dengan hasil polling berarti render baru saja selesai.
+    useEffect(() => {
+        if (status.stage === 'ready' && clip.stage !== 'ready') {
+            router.visit(routes.clips.show(clip.id));
+        } else if (status.stage === 'failed' && clip.stage !== 'failed') {
+            router.reload({ only: ['clip'] });
+        }
+    }, [status.stage, clip.stage, clip.id]);
 
     const startRender = () => {
         if (!form.data.title.trim()) {
             setClientError(copy.preview.titleRequired);
             return;
         }
-        setPlaying(false);
-        render.start();
+        videoRef.current?.pause();
+        form.post(routes.clips.render(clip.id), { preserveScroll: true });
     };
 
     return (
@@ -214,14 +227,21 @@ export default function Preview({ project, clip, transcript }: PreviewProps) {
                         ]}
                     />
 
-                    {render.running && (
+                    {rendering && (
                         <div className="grid gap-1.5" aria-live="polite">
                             <div className="flex justify-between text-[13px] leading-5 text-muted-foreground">
                                 <span>{copy.preview.rendering}</span>
-                                <span className="font-mono text-xs tabular-nums">{Math.round(render.progress ?? 0)}%</span>
+                                <span className="font-mono text-xs tabular-nums">{status.percent}%</span>
                             </div>
-                            <Progress value={render.progress ?? 0} aria-label={copy.preview.renderingLabel} className="h-1" />
+                            <Progress value={status.percent} aria-label={copy.preview.renderingLabel} className="h-1" />
                         </div>
+                    )}
+
+                    {status.stage === 'failed' && (
+                        <Alert tone="error">
+                            <CircleX strokeWidth={1.75} />
+                            {status.error ?? copy.preview.renderFailed}
+                        </Alert>
                     )}
                 </div>
             </div>

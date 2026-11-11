@@ -22,15 +22,12 @@ export default function Processing({
     project,
     status: initial,
 }: ProcessingProps) {
-    const { status } = useJobPolling(initial, project.id);
+    const { status } = useJobPolling(initial, routes.projects.status(project.id));
     const failed = status.stage === 'failed';
 
     useEffect(() => {
         if (status.stage === 'ready') {
-            router.visit(
-                `/projects/${encodeURIComponent(project.id)}/segments`,
-                { replace: true },
-            );
+            router.visit(routes.projects.segments(project.id), { replace: true });
         }
     }, [status.stage, project.id]);
 
@@ -59,21 +56,6 @@ export default function Processing({
                         <Alert tone="error">
                             <CircleX strokeWidth={1.75} />
                             {status.error ?? copy.processing.failed}
-                        </Alert>
-                    )}
-
-                    {status.stage === 'extracting' && (
-                        <Alert>
-                            Transkripsi selesai. Integrasi pencarian
-                            kandidat klip belum tersedia. Proses belum
-                            dapat dilanjutkan secara otomatis.
-                        </Alert>
-                    )}
-
-                    {status.stage === 'ready' && (
-                        <Alert>
-                            Pemrosesan selesai, tetapi halaman kandidat
-                            klip proyek nyata belum terintegrasi.
                         </Alert>
                     )}
                 </CardContent>

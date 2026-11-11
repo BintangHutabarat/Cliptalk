@@ -1,21 +1,25 @@
-
 import { useEffect, useState } from 'react';
 
-import { routes } from '@/lib/routes';
-import type { ProjectStatus } from '@/types/cliptalk';
+const TERMINAL_STAGES: readonly string[] = ['ready', 'failed'];
 
-export function useJobPolling(
-    initial: ProjectStatus,
-    projectId: string,
-) {
+/**
+ * Memantau status job (ProjectStatus atau ClipStatus) tiap 2 detik selama stage-nya belum diam.
+ * `idleStages` harus stabil antar-render (konstanta modul).
+ */
+export function useJobPolling<T extends { stage: string }>(initial: T, url: string, idleStages: readonly string[] = TERMINAL_STAGES) {
     const [status, setStatus] = useState(initial);
 
+    // Props dari server berganti stage (mis. draft ke queued setelah minta render): ikuti saat render, bukan di effect.
+    const [seenStage, setSeenStage] = useState(initial.stage);
+    if (seenStage !== initial.stage) {
+        setSeenStage(initial.stage);
+        setStatus(initial);
+    }
+
+    const idle = idleStages.includes(status.stage);
+
     useEffect(() => {
-        // Polling hanya berhenti pada status terminal.
-        if (
-            status.stage === 'ready' ||
-            status.stage === 'failed'
-        ) {
+        if (idle) {
             return;
         }
 
@@ -23,23 +27,16 @@ export function useJobPolling(
 
         const poll = async () => {
             try {
-                const response = await fetch(
-                    routes.projects.status(projectId),
-                    {
-                        method: 'GET',
-                        headers: {
-                            Accept: 'application/json',
-                        },
-                        credentials: 'same-origin',
-                    },
-                );
+                const response = await fetch(url, {
+                    headers: { Accept: 'application/json' },
+                    credentials: 'same-origin',
+                });
 
                 if (!response.ok) {
                     return;
                 }
 
-                const nextStatus =
-                    (await response.json()) as ProjectStatus;
+                const nextStatus = (await response.json()) as T;
 
                 if (active) {
                     setStatus(nextStatus);
@@ -59,7 +56,7 @@ export function useJobPolling(
             active = false;
             window.clearInterval(interval);
         };
-    }, [projectId, status.stage]);
+    }, [url, idle]);
 
     return { status };
 }
