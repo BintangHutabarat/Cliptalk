@@ -11,6 +11,7 @@ export const routes = {
         store: (project: string) => `/projects/${project}/clips`,
         preview: (clip: string) => `/clips/${clip}/preview`,
         render: (clip: string) => `/clips/${clip}/render`,
+        status: (clip: string) => `/clips/${clip}/status`,
         show: (clip: string) => `/clips/${clip}`,
     },
 } as const;

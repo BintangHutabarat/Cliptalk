@@ -68,9 +68,12 @@ class TranscribeProject implements ShouldQueue
         );
 
         if ($candidates === []) {
-            throw new RuntimeException(
-                'Tidak ada kandidat klip yang memenuhi kriteria.'
-            );
+            $project->update([
+                'stage' => 'failed',
+                'error' => "Tidak ada bagian yang cocok untuk klip {$project->target_duration} detik. Pilih durasi klip yang lebih pendek atau unggah video dengan pembicaraan yang lebih panjang.",
+            ]);
+
+            return;
         }
 
         // Simpan kandidat agar tidak perlu dihitung ulang
@@ -112,7 +115,7 @@ class TranscribeProject implements ShouldQueue
 
         $project->update([
             'stage' => 'failed',
-            'error' => 'Pemrosesan video gagal. Periksa log aplikasi untuk mengetahui penyebabnya.',
+            'error' => 'Pemrosesan video gagal. Pastikan video memiliki suara yang jelas, lalu unggah ulang.',
         ]);
     }
 }

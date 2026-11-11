@@ -80,7 +80,7 @@ export const copy = {
             pending: 'Menunggu',
             error: 'Gagal',
         },
-        failed: 'Transkripsi gagal karena audio tidak terbaca. Pastikan video memiliki suara, lalu coba lagi.',
+        failed: 'Pemrosesan video gagal. Pastikan video memiliki suara yang jelas, lalu unggah ulang.',
     },
 
     segments: {
@@ -123,6 +123,7 @@ export const copy = {
         },
         rendering: 'Merender klip…',
         renderingLabel: 'Progres render',
+        renderFailed: 'Render klip gagal. Coba render lagi. Jika masih gagal, unggah ulang videonya.',
     },
 
     show: {

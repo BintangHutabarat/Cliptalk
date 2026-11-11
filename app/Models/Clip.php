@@ -26,6 +26,7 @@ class Clip extends Model
         'output_path',
         'subtitle_path',
         'output_size_bytes',
+        'sha256',
     ];
 
     protected function casts(): array

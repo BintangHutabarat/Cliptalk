@@ -77,7 +77,7 @@ Legenda: **DoD** = *definition of done*, yaitu syarat sebuah task dianggap seles
 - [ ] 6.4 Job `TranscribeVideo` (Process, timeout, retry 1x, simpan transcript, update stage/progress).
 - [ ] 6.5 Job `GenerateCandidates` dengan heuristik dari SYSTEM-DESIGN.md §6.
 - [ ] 6.6 Endpoint status + ganti mock polling dengan polling sungguhan.
-- [ ] 6.7 Generator ASS (2 gaya) + job `RenderClip` (FFmpeg center crop 1080×1920, burn subtitle, progres, sha256).
+- [x] 6.7 Generator ASS (2 gaya) + job `RenderClip` (FFmpeg center crop 1080×1920, burn subtitle, progres, sha256).
 - [ ] 6.8 Unduh MP4 + SRT (`Storage::download`).
 - [ ] 6.9 Scheduler `PurgeExpiredFiles` (setiap jam).
 - [ ] 6.10 Feature test Pest untuk 7 skenario di Tabel 1 naskah.

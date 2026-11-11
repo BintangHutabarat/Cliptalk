@@ -21,6 +21,7 @@ Route::get('/projects/{project}/segments', [ProjectController::class, 'segments'
 Route::post('/projects/{project}/clips', [ClipController::class, 'store'])->name('clips.store');
 Route::get('/clips/{clip}/preview', [ClipController::class, 'preview'])->name('clips.preview');
 Route::post('/clips/{clip}/render', [ClipController::class, 'render'])->name('clips.render');
+Route::get('/clips/{clip}/status', [ClipController::class, 'status'])->name('clips.status');
 Route::get('/clips/{clip}', [ClipController::class, 'show'])->name('clips.show');
 
 Route::get('/clips/{clip}/download/video', [ClipController::class, 'downloadVideo'])->name('clips.download.video');
