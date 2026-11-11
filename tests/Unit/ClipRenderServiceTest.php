@@ -16,12 +16,12 @@ class ClipRenderServiceTest extends TestCase
         return array_values(array_filter(explode("\n", $ass), fn (string $line) => str_starts_with($line, 'Dialogue:')));
     }
 
-    public function test_ass_uses_vertical_canvas_and_spec_font(): void
+    public function test_ass_uses_the_output_canvas_and_spec_font(): void
     {
         $ass = (new ClipRenderService)->buildAss([], 0, 10, CaptionStyle::Outline);
 
-        $this->assertStringContainsString("PlayResX: 1080\nPlayResY: 1920", $ass);
-        $this->assertStringContainsString('Style: Default,Geist,64,&H00FFFFFF,&H00FFFFFF,&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,3,0,2,76,76,420,1', $ass);
+        $this->assertStringContainsString("PlayResX: 1920\nPlayResY: 1080", $ass);
+        $this->assertStringContainsString('Style: Default,Geist,72,&H00FFFFFF,&H00FFFFFF,&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,3,0,2,160,160,150,1', $ass);
     }
 
     public function test_plate_style_uses_opaque_box(): void

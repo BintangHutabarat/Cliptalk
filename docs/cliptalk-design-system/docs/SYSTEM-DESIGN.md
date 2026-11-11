@@ -117,7 +117,7 @@ export interface Clip {
   start: number; end: number;
   showCaptions: boolean;
   captionStyle: CaptionStyle;
-  width: 1080; height: 1920;
+  width: 1920; height: 1080; // sementara landscape; lihat catatan di §6
   videoCodec: 'h264'; audioCodec: 'aac';
   stage: ClipStage;
   progress: number;             // 0–100
@@ -180,6 +180,8 @@ Model: `Project hasOne Transcript, hasMany Candidate, hasMany Clip`. Enum PHP: `
    - Menghitung `sha256` dan ukuran file. Progres dibaca dari `-progress pipe:1`.
 5. **`PurgeExpiredFiles`** dijadwalkan tiap jam dan menghapus file serta baris yang `expires_at < now()`.
 
+> **Sementara (keputusan 11 November 2026):** hasil render berformat landscape 16:9, 1920×1080. Gambar dimuatkan utuh tanpa dipotong; sumber dengan rasio lain diberi bingkai hitam. Subtitle ASS memakai Geist 72 dengan margin bawah 150. Format 9:16 di bawah ini dipakai lagi nanti.
+
 Mode reframe 9:16 untuk MVP adalah **center crop**. Rencana berikutnya adalah blur background atau face tracking (OpenCV/MediaPipe).
 
 ## 7. Validasi
@@ -204,5 +206,5 @@ Mode reframe 9:16 untuk MVP adalah **center crop**. Rencana berikutnya adalah bl
 | 3 | Menentukan kandidat | `GenerateCandidates`, `projects/segments` | Rentang kandidat sesuai percakapan |
 | 4 | Memotong video | `RenderClip` | Durasi output = `end - start` |
 | 5 | Menambahkan subtitle | `RenderClip` (ASS) | Teks terbaca dan selaras |
-| 6 | Mengubah format | `RenderClip` | Output 1080×1920 |
+| 6 | Mengubah format | `RenderClip` | Output 1920×1080 (sementara; rencana 1080×1920) |
 | 7 | Meninjau & mengunduh | `clips/preview`, `clips/show` | Bisa diputar dan diunduh |

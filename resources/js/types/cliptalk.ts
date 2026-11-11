@@ -60,8 +60,8 @@ export interface Clip {
     end: number;
     showCaptions: boolean;
     captionStyle: CaptionStyle;
-    width: 1080;
-    height: 1920;
+    width: 1920;
+    height: 1080;
     videoCodec: 'h264';
     audioCodec: 'aac';
     stage: ClipStage;

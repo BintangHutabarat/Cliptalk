@@ -105,7 +105,7 @@ function Foundations() {
                     <p className="text-[13px] leading-5 text-muted-foreground">Small 13, untuk deskripsi dan metadata.</p>
                     <p className="text-xs text-muted-foreground">Caption 12, nama pembicara</p>
                     <p className="font-mono text-[13px] font-medium tabular-nums">00:02:14 – 00:02:58</p>
-                    <p className="font-mono text-xs whitespace-pre tabular-nums">{'1080×1920  H.264 + AAC'}</p>
+                    <p className="font-mono text-xs whitespace-pre tabular-nums">{'1920×1080  H.264 + AAC'}</p>
                 </div>
             </Section>
         </>

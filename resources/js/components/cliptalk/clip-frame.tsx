@@ -23,9 +23,9 @@ type ClipFrameProps = {
     className?: string;
 };
 
-// Gaya harus sama dengan ASS yang dibakar FFmpeg (SYSTEM-DESIGN.md §6): Geist 700, 64 pada kanvas 1080.
+// Gaya harus sama dengan ASS yang dibakar FFmpeg (ClipRenderService::buildAss): Geist 700, 72 pada kanvas 1920×1080.
 const captionStyles: Record<CaptionStyle, string> = {
-    outline: '[-webkit-text-stroke:0.9cqw_var(--caption-edge)] [paint-order:stroke_fill]',
+    outline: '[-webkit-text-stroke:0.5cqw_var(--caption-edge)] [paint-order:stroke_fill]',
     plate: 'rounded-sm bg-caption-plate px-[0.45em] py-[0.3em] leading-[1.55] box-decoration-clone',
 };
 
@@ -47,7 +47,7 @@ export function ClipFrame({ words, start, end, time, showCaptions, captionStyle,
             {lines && (
                 <p
                     aria-live="off"
-                    className="absolute inset-x-[7%] bottom-[22%] text-center text-[6.2cqw] leading-[1.2] font-bold text-caption-ink"
+                    className="absolute inset-x-[8%] bottom-[14%] text-center text-[3.75cqw] leading-[1.2] font-bold text-caption-ink"
                 >
                     <span className={captionStyles[captionStyle]}>
                         {lines.map((line, i) => (

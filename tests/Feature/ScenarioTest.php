@@ -244,11 +244,11 @@ class ScenarioTest extends TestCase
         $this->assertNotSame($withCaptions->sha256, $withoutCaptions->sha256);
     }
 
-    public function test_scenario_6_landscape_source_becomes_a_1080_by_1920_h264_video(): void
+    public function test_scenario_6_output_is_a_1920_by_1080_h264_video(): void
     {
         $output = $this->probe($this->renderedClip()->output_path);
 
-        $this->assertSame([1080, 1920], [$output['width'], $output['height']]);
+        $this->assertSame([1920, 1080], [$output['width'], $output['height']]);
         $this->assertEqualsCanonicalizing(['h264', 'aac'], $output['codecs']);
     }
 

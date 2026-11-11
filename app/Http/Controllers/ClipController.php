@@ -8,6 +8,7 @@ use App\Enums\ProjectStage;
 use App\Jobs\RenderClip;
 use App\Models\Clip;
 use App\Models\Project;
+use App\Services\ClipRenderService;
 use App\Services\TranscriptionService;
 use App\Support\MockData;
 use Illuminate\Http\JsonResponse;
@@ -384,8 +385,8 @@ class ClipController extends Controller
             'end' => (float) $clip->end_sec,
             'showCaptions' => $clip->show_captions,
             'captionStyle' => $clip->caption_style,
-            'width' => (int) ($clip->project->width ?? 0),
-            'height' => (int) ($clip->project->height ?? 0),
+            'width' => ClipRenderService::WIDTH,
+            'height' => ClipRenderService::HEIGHT,
             'videoCodec' => 'h264',
             'audioCodec' => 'aac',
             'stage' => $clip->stage,

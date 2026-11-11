@@ -11,6 +11,13 @@ use RuntimeException;
 class ClipRenderService
 {
     /**
+     * Ukuran video hasil. Sementara landscape 16:9; naskah awal (SYSTEM-DESIGN.md §6) memakai 9:16 1080×1920.
+     */
+    public const WIDTH = 1920;
+
+    public const HEIGHT = 1080;
+
+    /**
      * @param  (callable(int): void)|null  $onProgress  dipanggil dengan persen 0–99 selama FFmpeg berjalan
      * @return array{output_path: string, subtitle_path: string|null, output_size_bytes: int, sha256: string}
      */
@@ -88,10 +95,11 @@ class ClipRenderService
             '+faststart',
         ];
 
-        // Center crop 9:16 lalu 1080×1920 (SYSTEM-DESIGN §6); min() menjaga sumber yang sudah vertikal.
+        // Muatkan seluruh gambar ke kanvas tanpa memotong; sumber dengan rasio lain diberi bingkai hitam.
+        $size = self::WIDTH.':'.self::HEIGHT;
         $videoFilters = [
-            "crop='min(iw,ih*9/16)':'min(ih,iw*16/9)'",
-            'scale=1080:1920',
+            "scale={$size}:force_original_aspect_ratio=decrease",
+            "pad={$size}:(ow-iw)/2:(oh-ih)/2:black",
             'setsar=1',
         ];
 
@@ -248,8 +256,9 @@ class ClipRenderService
     }
 
     /**
-     * Subtitle ASS untuk dibakar ke video 1080×1920 (SYSTEM-DESIGN §6):
-     * Geist 700 ukuran 64, maks 2 baris dan ~32 karakter per baris, gaya outline atau latar gelap.
+     * Subtitle ASS untuk dibakar ke video WIDTH×HEIGHT:
+     * Geist 700 ukuran 72, maks 2 baris dan ~32 karakter per baris, gaya outline atau latar gelap.
+     * Ukuran dan posisi sama dengan overlay ClipFrame di halaman Pratinjau.
      *
      * @param  array<int, mixed>  $segments
      */
@@ -267,14 +276,14 @@ class ClipRenderService
         $lines = [
             '[Script Info]',
             'ScriptType: v4.00+',
-            'PlayResX: 1080',
-            'PlayResY: 1920',
+            'PlayResX: '.self::WIDTH,
+            'PlayResY: '.self::HEIGHT,
             'WrapStyle: 2',
             'ScaledBorderAndShadow: yes',
             '',
             '[V4+ Styles]',
             'Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding',
-            "Style: Default,Geist,64,&H00FFFFFF,&H00FFFFFF,{$border},2,76,76,420,1",
+            "Style: Default,Geist,72,&H00FFFFFF,&H00FFFFFF,{$border},2,160,160,150,1",
             '',
             '[Events]',
             'Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text',

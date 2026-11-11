@@ -52,7 +52,7 @@ export const copy = {
         durationDescription: 'Target panjang tiap klip.',
         durationOption: (sec: number) => `${sec} dtk`,
         formatTitle: 'Format',
-        formatValue: '9:16  1080×1920',
+        formatValue: '16:9  1920×1080',
         languageTitle: 'Bahasa transkrip',
         languageValue: 'Bahasa Indonesia',
         footnote: 'Lama proses tergantung durasi video.',
@@ -94,7 +94,7 @@ export const copy = {
         transcriptTitle: 'Transkrip',
         transcriptTotal: 'total',
         lowConfidence: 'Kurang yakin',
-        footnote: 'Rasio 9:16 diterapkan otomatis di langkah berikutnya.',
+        footnote: 'Klip dibuat dalam format landscape 16:9 di langkah berikutnya.',
         score: (n: number) => `Skor ${n}`,
     },
 
@@ -146,7 +146,7 @@ export const copy = {
         source: 'Video sumber',
         captionsOn: (style: string) => `Aktif, ${style.toLowerCase()}`,
         captionsOff: 'Tidak aktif',
-        ratioValue: '9:16  1080×1920',
+        ratioValue: '16:9  1920×1080',
         formatValue: 'MP4  H.264 + AAC',
     },
 
