@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
 class Project extends Model
@@ -36,6 +37,11 @@ class Project extends Model
             'height' => 'integer',
             'fps' => 'float',
         ];
+    }
+
+    public function clips(): HasMany
+    {
+        return $this->hasMany(Clip::class);
     }
 
     protected static function booted(): void
