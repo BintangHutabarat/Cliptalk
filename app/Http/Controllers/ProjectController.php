@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ProjectStage;
 use App\Jobs\TranscribeProject;
 use App\Models\Project;
 use App\Services\TranscriptionService;
@@ -56,7 +57,7 @@ class ProjectController extends Controller
             'width' => $metadata['width'],
             'height' => $metadata['height'],
             'fps' => $metadata['fps'],
-            'stage' => 'uploaded',
+            'stage' => ProjectStage::Uploaded,
         ]);
 
         // Buat UUID sebelum menentukan lokasi penyimpanan video.
@@ -144,6 +145,7 @@ class ProjectController extends Controller
     public function status(string $project)
     {
         $record = Project::findOrFail($project);
+        $stage = $record->stage->value;
 
         $labels = [
             'uploaded' => 'Video diunggah',
@@ -160,14 +162,14 @@ class ProjectController extends Controller
             'ready',
         ];
 
-        $currentIndex = array_search($record->stage, $order, true);
+        $currentIndex = array_search($stage, $order, true);
 
         $stages = [];
 
         foreach ($order as $index => $key) {
             $state = 'pending';
 
-            if ($record->stage === 'failed') {
+            if ($stage === 'failed') {
                 if ($index < 2) {
                     $state = 'done';
                 } elseif ($index === 2) {
@@ -197,8 +199,8 @@ class ProjectController extends Controller
         ];
 
         return response()->json([
-            'stage' => $record->stage,
-            'percent' => $percentages[$record->stage] ?? 0,
+            'stage' => $stage,
+            'percent' => $percentages[$stage] ?? 0,
             'stages' => $stages,
             'error' => $record->error,
         ]);
@@ -218,7 +220,7 @@ class ProjectController extends Controller
         $record = Project::findOrFail($project);
 
         abort_unless(
-            $record->stage === 'ready',
+            $record->stage === ProjectStage::Ready,
             409,
             'Pemrosesan video belum selesai.'
         );

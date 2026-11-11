@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Enums\ClipStage;
+use App\Enums\ProjectStage;
 use App\Jobs\RenderClip;
 use App\Jobs\TranscribeProject;
 use App\Models\Clip;
@@ -57,7 +59,7 @@ class RenderClipTest extends TestCase
 
         Queue::assertPushed(RenderClip::class, fn (RenderClip $job) => $job->clipId === $clip->id);
         $clip->refresh();
-        $this->assertSame(['queued', 'Judul baru', 'plate'], [$clip->stage, $clip->title, $clip->caption_style]);
+        $this->assertSame(['queued', 'Judul baru', 'plate'], [$clip->stage->value, $clip->title, $clip->caption_style->value]);
     }
 
     public function test_render_request_is_rejected_while_a_render_is_running(): void
@@ -81,6 +83,18 @@ class RenderClipTest extends TestCase
             ->assertExactJson(['stage' => 'rendering', 'percent' => 45, 'error' => null]);
     }
 
+    public function test_project_status_endpoint_marks_finished_and_active_stages(): void
+    {
+        $project = $this->draftClip()->project;
+        $project->update(['stage' => 'extracting']);
+
+        $this->getJson(route('projects.status', $project->id))
+            ->assertOk()
+            ->assertJsonPath('stage', 'extracting')
+            ->assertJsonPath('percent', 70)
+            ->assertJsonPath('stages.*.state', ['done', 'done', 'active', 'pending']);
+    }
+
     public function test_job_reports_progress_and_marks_the_clip_ready(): void
     {
         $clip = $this->draftClip('queued');
@@ -90,7 +104,7 @@ class RenderClipTest extends TestCase
             ->once()
             ->andReturnUsing(function (Clip $rendering, callable $onProgress) {
                 $onProgress(40);
-                $this->assertSame(['rendering', 40], [$rendering->fresh()->stage, $rendering->fresh()->progress]);
+                $this->assertSame(['rendering', 40], [$rendering->fresh()->stage->value, $rendering->fresh()->progress]);
 
                 return ['output_path' => 'projects/x/clip.mp4', 'subtitle_path' => null, 'output_size_bytes' => 123];
             });
@@ -98,7 +112,7 @@ class RenderClipTest extends TestCase
         RenderClip::dispatchSync($clip->id);
 
         $clip->refresh();
-        $this->assertSame(['ready', 100, 'projects/x/clip.mp4'], [$clip->stage, $clip->progress, $clip->output_path]);
+        $this->assertSame(['ready', 100, 'projects/x/clip.mp4'], [$clip->stage->value, $clip->progress, $clip->output_path]);
     }
 
     public function test_failed_job_stores_a_fixable_message_without_technical_details(): void
@@ -108,7 +122,7 @@ class RenderClipTest extends TestCase
         (new RenderClip($clip->id))->failed(new RuntimeException('FFmpeg gagal: Invalid data found'));
 
         $clip->refresh();
-        $this->assertSame('failed', $clip->stage);
+        $this->assertSame(ClipStage::Failed, $clip->stage);
         $this->assertSame('Render klip gagal. Coba render lagi. Jika masih gagal, unggah ulang videonya.', $clip->error);
     }
 
@@ -128,7 +142,7 @@ class RenderClipTest extends TestCase
         TranscribeProject::dispatchSync($project->id);
 
         $project->refresh();
-        $this->assertSame('failed', $project->stage);
+        $this->assertSame(ProjectStage::Failed, $project->stage);
         $this->assertStringStartsWith('Tidak ada bagian yang cocok untuk klip 60 detik.', $project->error);
     }
 }

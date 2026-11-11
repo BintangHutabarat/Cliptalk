@@ -71,7 +71,7 @@ Legenda: **DoD** = *definition of done*, yaitu syarat sebuah task dianggap seles
 
 ## Fase 2 — Backend inti
 
-- [ ] 6.1 Migration + model + enum (`projects`, `transcripts`, `candidates`, `clips`).
+- [x] 6.1 Migration + model + enum (`projects`, `transcripts`, `candidates`, `clips`).
 - [ ] 6.2 Upload sungguhan (chunk) ke `storage/app/cliptalk/{project}/source.*` + `ProbeVideo`.
 - [x] 6.3 `worker/transcribe.py` (Faster-Whisper, `language="id"`, `word_timestamps=True`, `vad_filter=True`, output JSON + progres di stdout) dan `requirements.txt`.
 - [x] 6.4 Job `TranscribeVideo` (Process, timeout, retry 1x, simpan transcript, update stage/progress).

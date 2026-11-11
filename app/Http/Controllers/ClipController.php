@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\CaptionStyle;
+use App\Enums\ClipStage;
+use App\Enums\ProjectStage;
 use App\Jobs\RenderClip;
 use App\Models\Clip;
 use App\Models\Project;
@@ -55,7 +58,7 @@ class ClipController extends Controller
         $record = Project::findOrFail($project);
 
         abort_unless(
-            $record->stage === 'ready',
+            $record->stage === ProjectStage::Ready,
             409,
             'Project belum selesai diproses.'
         );
@@ -120,8 +123,8 @@ class ClipController extends Controller
             'start_sec' => $start,
             'end_sec' => $end,
             'show_captions' => true,
-            'caption_style' => 'outline',
-            'stage' => 'draft',
+            'caption_style' => CaptionStyle::Outline,
+            'stage' => ClipStage::Draft,
             'progress' => 0,
         ]);
 
@@ -185,7 +188,7 @@ class ClipController extends Controller
                 'showCaptions' => ['required', 'boolean'],
                 'captionStyle' => [
                     'required',
-                    Rule::in(['outline', 'plate']),
+                    Rule::enum(CaptionStyle::class),
                 ],
             ]);
 
@@ -205,11 +208,11 @@ class ClipController extends Controller
             'showCaptions' => ['required', 'boolean'],
             'captionStyle' => [
                 'required',
-                Rule::in(['outline', 'plate']),
+                Rule::enum(CaptionStyle::class),
             ],
         ]);
 
-        if (in_array($record->stage, ['queued', 'rendering'], true)) {
+        if ($record->stage->isBusy()) {
             return back()->withErrors([
                 'render' => 'Klip ini sedang dirender. Tunggu sampai selesai.',
             ]);
@@ -219,7 +222,7 @@ class ClipController extends Controller
             'title' => trim($validated['title']),
             'show_captions' => (bool) $validated['showCaptions'],
             'caption_style' => $validated['captionStyle'],
-            'stage' => 'queued',
+            'stage' => ClipStage::Queued,
             'progress' => 0,
             'error' => null,
         ]);
@@ -260,7 +263,7 @@ class ClipController extends Controller
         $record = Clip::with('project')->findOrFail($clip);
 
         abort_unless(
-            $record->stage === 'ready' && $record->output_path,
+            $record->stage === ClipStage::Ready && $record->output_path,
             409,
             'Klip belum selesai dirender.'
         );
@@ -278,7 +281,7 @@ class ClipController extends Controller
         $disk = Storage::disk('local');
 
         abort_unless(
-            $record->stage === 'ready'
+            $record->stage === ClipStage::Ready
                 && $record->output_path
                 && $disk->exists($record->output_path),
             404,
@@ -302,7 +305,7 @@ class ClipController extends Controller
         $disk = Storage::disk('local');
 
         abort_unless(
-            $record->stage === 'ready'
+            $record->stage === ClipStage::Ready
                 && $record->output_path
                 && $disk->exists($record->output_path),
             404,
@@ -318,7 +321,7 @@ class ClipController extends Controller
         $disk = Storage::disk('local');
 
         abort_unless(
-            $record->stage === 'ready'
+            $record->stage === ClipStage::Ready
                 && $record->subtitle_path
                 && $disk->exists($record->subtitle_path),
             404,
@@ -364,11 +367,11 @@ class ClipController extends Controller
     {
         $disk = Storage::disk('local');
 
-        $hasVideo = $clip->stage === 'ready'
+        $hasVideo = $clip->stage === ClipStage::Ready
             && $clip->output_path
             && $disk->exists($clip->output_path);
 
-        $hasSubtitle = $clip->stage === 'ready'
+        $hasSubtitle = $clip->stage === ClipStage::Ready
             && $clip->subtitle_path
             && $disk->exists($clip->subtitle_path);
 

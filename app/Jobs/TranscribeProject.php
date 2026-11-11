@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Enums\ProjectStage;
 use App\Models\Project;
 use App\Services\CandidateGenerationService;
 use App\Services\TranscriptionService;
@@ -30,7 +31,7 @@ class TranscribeProject implements ShouldQueue
         $project = Project::findOrFail($this->projectId);
 
         $project->update([
-            'stage' => 'transcribing',
+            'stage' => ProjectStage::Transcribing,
             'error' => null,
         ]);
 
@@ -56,7 +57,7 @@ class TranscribeProject implements ShouldQueue
 
         $project->update([
             'transcript_path' => $transcriptPath,
-            'stage' => 'extracting',
+            'stage' => ProjectStage::Extracting,
             'error' => null,
         ]);
 
@@ -69,7 +70,7 @@ class TranscribeProject implements ShouldQueue
 
         if ($candidates === []) {
             $project->update([
-                'stage' => 'failed',
+                'stage' => ProjectStage::Failed,
                 'error' => "Tidak ada bagian yang cocok untuk klip {$project->target_duration} detik. Pilih durasi klip yang lebih pendek atau unggah video dengan pembicaraan yang lebih panjang.",
             ]);
 
@@ -98,7 +99,7 @@ class TranscribeProject implements ShouldQueue
 
         // Proyek baru siap setelah kedua tahap berhasil.
         $project->update([
-            'stage' => 'ready',
+            'stage' => ProjectStage::Ready,
             'error' => null,
         ]);
     }
@@ -114,7 +115,7 @@ class TranscribeProject implements ShouldQueue
         report($exception);
 
         $project->update([
-            'stage' => 'failed',
+            'stage' => ProjectStage::Failed,
             'error' => 'Pemrosesan video gagal. Pastikan video memiliki suara yang jelas, lalu unggah ulang.',
         ]);
     }

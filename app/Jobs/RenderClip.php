@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Enums\ClipStage;
 use App\Models\Clip;
 use App\Services\ClipRenderService;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -25,7 +26,7 @@ class RenderClip implements ShouldQueue
         $clip = Clip::findOrFail($this->clipId);
 
         $clip->update([
-            'stage' => 'rendering',
+            'stage' => ClipStage::Rendering,
             'progress' => 0,
             'error' => null,
         ]);
@@ -37,7 +38,7 @@ class RenderClip implements ShouldQueue
 
         $clip->update([
             ...$result,
-            'stage' => 'ready',
+            'stage' => ClipStage::Ready,
             'progress' => 100,
             'error' => null,
         ]);
@@ -49,7 +50,7 @@ class RenderClip implements ShouldQueue
 
         // Detail teknis masuk log; pengguna hanya melihat cara memperbaikinya (RULE.md §4).
         Clip::whereKey($this->clipId)->update([
-            'stage' => 'failed',
+            'stage' => ClipStage::Failed,
             'progress' => 0,
             'error' => 'Render klip gagal. Coba render lagi. Jika masih gagal, unggah ulang videonya.',
         ]);

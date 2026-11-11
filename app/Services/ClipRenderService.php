@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\CaptionStyle;
 use App\Models\Clip;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Storage;
@@ -101,7 +102,7 @@ class ClipRenderService
                     $segments,
                     (float) $clip->start_sec,
                     (float) $clip->end_sec,
-                    (string) $clip->caption_style
+                    $clip->caption_style
                 )
             );
             $videoFilters[] = 'ass=clip.ass';
@@ -256,10 +257,10 @@ class ClipRenderService
         array $segments,
         float $clipStart,
         float $clipEnd,
-        string $style
+        CaptionStyle $style
     ): string {
         // Warna ASS &HAABBGGRR; alpha 48 ≈ 72% buram, sama dengan token caption-plate.
-        $border = $style === 'plate'
+        $border = $style === CaptionStyle::Plate
             ? '&H48000000,&H48000000,-1,0,0,0,100,100,0,0,3,14,0'
             : '&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,3,0';
 

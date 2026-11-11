@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\Enums\CaptionStyle;
 use App\Services\ClipRenderService;
 use PHPUnit\Framework\TestCase;
 
@@ -17,7 +18,7 @@ class ClipRenderServiceTest extends TestCase
 
     public function test_ass_uses_vertical_canvas_and_spec_font(): void
     {
-        $ass = (new ClipRenderService)->buildAss([], 0, 10, 'outline');
+        $ass = (new ClipRenderService)->buildAss([], 0, 10, CaptionStyle::Outline);
 
         $this->assertStringContainsString("PlayResX: 1080\nPlayResY: 1920", $ass);
         $this->assertStringContainsString('Style: Default,Geist,64,&H00FFFFFF,&H00FFFFFF,&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,3,0,2,76,76,420,1', $ass);
@@ -25,7 +26,7 @@ class ClipRenderServiceTest extends TestCase
 
     public function test_plate_style_uses_opaque_box(): void
     {
-        $ass = (new ClipRenderService)->buildAss([], 0, 10, 'plate');
+        $ass = (new ClipRenderService)->buildAss([], 0, 10, CaptionStyle::Plate);
 
         $this->assertStringContainsString(',&H48000000,&H48000000,-1,0,0,0,100,100,0,0,3,14,0,2,', $ass);
     }
@@ -33,7 +34,7 @@ class ClipRenderServiceTest extends TestCase
     public function test_captions_have_at_most_two_lines_of_32_characters(): void
     {
         $text = 'Menurut saya, perkembangan teknologi itu bukan cuma soal alat baru, tapi soal cara kita bekerja setiap hari dan bagaimana tim kita beradaptasi.';
-        $ass = (new ClipRenderService)->buildAss([['start' => 10, 'end' => 30, 'text' => $text]], 10, 30, 'outline');
+        $ass = (new ClipRenderService)->buildAss([['start' => 10, 'end' => 30, 'text' => $text]], 10, 30, CaptionStyle::Outline);
 
         $events = $this->dialogues($ass);
         $this->assertGreaterThan(1, count($events));
@@ -59,7 +60,7 @@ class ClipRenderServiceTest extends TestCase
             ['start' => 19, 'end' => 25, 'text' => 'Akhir.'],
             ['start' => 30, 'end' => 32, 'text' => 'Sesudah klip.'],
         ];
-        $events = $this->dialogues((new ClipRenderService)->buildAss($segments, 10, 20, 'outline'));
+        $events = $this->dialogues((new ClipRenderService)->buildAss($segments, 10, 20, CaptionStyle::Outline));
 
         $this->assertSame([
             'Dialogue: 0,0:00:00.00,0:00:02.00,Default,,0,0,0,,Mulai.',
@@ -69,7 +70,7 @@ class ClipRenderServiceTest extends TestCase
 
     public function test_override_braces_are_removed_from_text(): void
     {
-        $events = $this->dialogues((new ClipRenderService)->buildAss([['start' => 0, 'end' => 2, 'text' => 'Halo {\b1}dunia']], 0, 2, 'outline'));
+        $events = $this->dialogues((new ClipRenderService)->buildAss([['start' => 0, 'end' => 2, 'text' => 'Halo {\b1}dunia']], 0, 2, CaptionStyle::Outline));
 
         $this->assertSame(['Dialogue: 0,0:00:00.00,0:00:02.00,Default,,0,0,0,,Halo \b1dunia'], $events);
     }
@@ -84,7 +85,7 @@ class ClipRenderServiceTest extends TestCase
         }
         $segment = ['start' => 10, 'end' => 30, 'text' => trim(implode('', $texts)), 'words' => $words];
 
-        $events = $this->dialogues((new ClipRenderService)->buildAss([$segment], 10, 30, 'outline'));
+        $events = $this->dialogues((new ClipRenderService)->buildAss([$segment], 10, 30, CaptionStyle::Outline));
 
         // Potongan berakhir saat kata terakhirnya selesai (detik 17), bukan dibagi rata sepanjang segmen.
         $this->assertSame([

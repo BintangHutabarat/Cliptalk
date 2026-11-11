@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ProjectStage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
@@ -36,6 +37,7 @@ class Project extends Model
             'width' => 'integer',
             'height' => 'integer',
             'fps' => 'float',
+            'stage' => ProjectStage::class,
         ];
     }
 

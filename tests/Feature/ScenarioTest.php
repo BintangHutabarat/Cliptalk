@@ -163,7 +163,7 @@ class ScenarioTest extends TestCase
 
         $project = Project::firstOrFail();
 
-        $this->assertSame([1280, 720, 12, 'uploaded'], [$project->width, $project->height, $project->duration_sec, $project->stage]);
+        $this->assertSame([1280, 720, 12, 'uploaded'], [$project->width, $project->height, $project->duration_sec, $project->stage->value]);
         Storage::disk('local')->assertExists($project->file_path);
         Queue::assertPushed(TranscribeProject::class, fn (TranscribeProject $job) => $job->projectId === $project->id);
     }
@@ -178,7 +178,7 @@ class ScenarioTest extends TestCase
         TranscribeProject::dispatchSync($project->id);
 
         $project->refresh();
-        $this->assertSame(['ready', self::TRANSCRIPT], [$project->stage, $project->transcript_path]);
+        $this->assertSame(['ready', self::TRANSCRIPT], [$project->stage->value, $project->transcript_path]);
 
         $this->get(route('projects.segments', $project->id))->assertInertia(fn (Assert $page) => $page
             ->has('transcript', 10)
@@ -223,7 +223,7 @@ class ScenarioTest extends TestCase
     {
         $clip = $this->renderedClip();
 
-        $this->assertSame(['ready', 100], [$clip->stage, $clip->progress]);
+        $this->assertSame(['ready', 100], [$clip->stage->value, $clip->progress]);
         $this->assertEqualsWithDelta(6.0, $this->probe($clip->output_path)['duration'], 0.15);
     }
 

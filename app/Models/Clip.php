@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\CaptionStyle;
+use App\Enums\ClipStage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
@@ -35,6 +37,8 @@ class Clip extends Model
             'start_sec' => 'float',
             'end_sec' => 'float',
             'show_captions' => 'boolean',
+            'caption_style' => CaptionStyle::class,
+            'stage' => ClipStage::class,
             'progress' => 'integer',
             'output_size_bytes' => 'integer',
         ];
