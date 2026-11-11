@@ -35,4 +35,19 @@ return [
         ],
     ],
 
+    'ffprobe' => [
+        'binary' => env('FFPROBE_PATH', 'ffprobe'),
+    ],
+
+    'transcription' => [
+        'python_binary' => env(
+            'TRANSCRIPTION_PYTHON',
+            base_path('.venv/Scripts/python.exe')
+        ),
+        'script' => env(
+            'TRANSCRIPTION_SCRIPT',
+            base_path('scripts/transcribe.py')
+        ),
+        'timeout' => 1800,
+    ],
 ];

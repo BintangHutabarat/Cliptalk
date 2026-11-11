@@ -1,0 +1,52 @@
+[
+    {
+        "id": "c1",
+        "projectId": "demo",
+        "title": "Bagaimana teknologi mengubah cara kerja",
+        "start": 134,
+        "end": 178,
+        "score": 98,
+        "reason": "Dibuka dengan pendapat tegas (\"menurut saya\"), ditutup dengan kesimpulan (\"intinya\"), dan berdiri sendiri tanpa konteks.",
+        "segmentIds": [
+            12,
+            13,
+            14,
+            15,
+            16
+        ]
+    },
+    {
+        "id": "c2",
+        "projectId": "demo",
+        "title": "Kreativitas vs otomatisasi alat digital",
+        "start": 854,
+        "end": 906,
+        "score": 89,
+        "reason": "Satu argumen utuh dengan kalimat penutup yang mudah dikutip. Keyakinan transkrip tinggi.",
+        "segmentIds": [
+            27,
+            28,
+            29,
+            30,
+            31,
+            32
+        ]
+    },
+    {
+        "id": "c3",
+        "projectId": "demo",
+        "title": "Pentingnya hook 3 detik pertama video",
+        "start": 1625,
+        "end": 1668,
+        "score": 85,
+        "reason": "Tips praktis yang padat dan relevan untuk pembuat konten. Diawali klaim yang kuat.",
+        "segmentIds": [
+            41,
+            42,
+            43,
+            44,
+            45,
+            46
+        ]
+    }
+]
