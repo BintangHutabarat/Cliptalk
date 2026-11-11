@@ -50,7 +50,7 @@ export function Dropzone({ limits, onFile, onError, disabled = false, className 
             }}
             className={cn(
                 'grid justify-items-center gap-3 rounded-lg border border-dashed border-input bg-card px-6 py-12 text-center transition-colors duration-150',
-                over && 'border-solid border-range-ink bg-range-soft',
+                over && 'border-solid border-foreground bg-accent',
                 disabled && 'opacity-50',
                 className,
             )}
