@@ -38,11 +38,11 @@ export function ClipFrame({ words, start, end, time, showCaptions, captionStyle,
     return (
         <div
             className={cn(
-                '@container relative aspect-[9/16] w-full max-w-[270px] overflow-hidden rounded-frame bg-stage text-stage-foreground',
+                '@container relative aspect-video w-full max-w-[480px] overflow-hidden rounded-frame bg-stage text-stage-foreground',
                 className,
             )}
         >
-            {children && <div className="absolute inset-0 [&>video]:size-full [&>video]:object-cover">{children}</div>}
+            {children && <div className="absolute inset-0 [&>video]:size-full [&>video]:object-contain">{children}</div>}
 
             {lines && (
                 <p

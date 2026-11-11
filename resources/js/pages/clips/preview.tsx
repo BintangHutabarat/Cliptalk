@@ -1,5 +1,5 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { ClipFrame } from '@/components/cliptalk/clip-frame';
 import { PageHeading } from '@/components/cliptalk/page-heading';
@@ -27,7 +27,7 @@ type PreviewProps = {
 
 const TITLE_MAX = 60;
 const RENDER_SIMULATION_MS = 2500;
-const PLAYBACK_TICK_MS = 100;
+
 
 export default function Preview({ project, clip, transcript }: PreviewProps) {
     const form = useForm({
@@ -38,23 +38,69 @@ export default function Preview({ project, clip, transcript }: PreviewProps) {
     const [clientError, setClientError] = useState<string | null>(null);
     const titleError = clientError ?? form.errors.title;
 
-    // shortcut: video hasil render belum ada di fase 1, jadi pratinjau memutar waktu simulasi di dalam rentang klip.
+    const videoRef = useRef<HTMLVideoElement>(null);
     const [time, setTime] = useState(clip.start);
     const [playing, setPlaying] = useState(false);
-    const words = useMemo(() => transcript.flatMap((s) => s.words), [transcript]);
+
+    const words = useMemo(
+        () =>
+            transcript.flatMap((segment) => {
+                const tokens = segment.text.trim().split(/\s+/).filter(Boolean);
+                if (tokens.length === 0) return [];
+
+                const duration = segment.end - segment.start;
+
+                return tokens.map((text, index) => ({
+                    text,
+                    start: segment.start + (duration * index) / tokens.length,
+                    end: segment.start + (duration * (index + 1)) / tokens.length,
+                    probability: 1,
+                }));
+            }),
+        [transcript],
+    );
 
     useEffect(() => {
-        if (!playing) return;
-        const id = window.setInterval(() => {
-            setTime((t) => {
-                const next = t + PLAYBACK_TICK_MS / 1000;
-                if (next < clip.end) return next;
-                setPlaying(false);
-                return clip.start;
-            });
-        }, PLAYBACK_TICK_MS);
-        return () => window.clearInterval(id);
-    }, [playing, clip.start, clip.end]);
+        const video = videoRef.current;
+
+        if (video && video.readyState >= 1) {
+            video.currentTime = clip.start;
+        }
+
+        setTime(clip.start);
+        setPlaying(false);
+    }, [clip.start, clip.id]);
+
+    const togglePlayback = () => {
+        const video = videoRef.current;
+        if (!video) return;
+
+        if (!video.paused) {
+            video.pause();
+            return;
+        }
+
+        if (video.currentTime >= clip.end - 0.05) {
+            video.currentTime = clip.start;
+        }
+
+        void video.play().catch(() => {
+            setPlaying(false);
+        });
+    };
+
+    const handleTimeUpdate = (
+        event: React.SyntheticEvent<HTMLVideoElement>,
+    ) => {
+        const video = event.currentTarget;
+
+        if (video.currentTime >= clip.end) {
+            video.pause();
+            video.currentTime = clip.end;
+        }
+
+        setTime(Math.min(video.currentTime, clip.end));
+    };
 
     const render = useSimulatedProgress(RENDER_SIMULATION_MS, (reset) => {
         form.post(routes.clips.render(clip.id), { onFinish: reset });
@@ -77,7 +123,7 @@ export default function Preview({ project, clip, transcript }: PreviewProps) {
 
             <div className="mt-8 flex flex-col gap-6 sm:flex-row sm:items-start">
                 <ClipFrame
-                    className="shrink-0 sm:w-[270px]"
+                    className="w-full shrink-0 sm:w-[480px]"
                     words={words}
                     start={clip.start}
                     end={clip.end}
@@ -85,8 +131,22 @@ export default function Preview({ project, clip, transcript }: PreviewProps) {
                     showCaptions={form.data.showCaptions}
                     captionStyle={form.data.captionStyle}
                     playing={playing}
-                    onPlayToggle={() => setPlaying((p) => !p)}
-                />
+                    onPlayToggle={togglePlayback}
+                >
+                    <video
+                        ref={videoRef}
+                        src={project.sourceUrl}
+                        preload="metadata"
+                        playsInline
+                        onLoadedMetadata={(event) => {
+                            event.currentTarget.currentTime = clip.start;
+                        }}
+                        onTimeUpdate={handleTimeUpdate}
+                        onPlay={() => setPlaying(true)}
+                        onPause={() => setPlaying(false)}
+                        onEnded={() => setPlaying(false)}
+                    />
+                </ClipFrame>
 
                 <div className="grid min-w-0 flex-1 gap-6 sm:max-w-[360px]">
                     <div className="grid gap-2">

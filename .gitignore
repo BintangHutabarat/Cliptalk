@@ -26,3 +26,4 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 /docs/cliptalk-design-system/components
+.venv/

@@ -4,6 +4,7 @@ export const routes = {
     projects: {
         store: () => '/projects',
         processing: (project: string) => `/projects/${project}/processing`,
+        status: (project: string) => `/projects/${project}/status`,
         segments: (project: string) => `/projects/${project}/segments`,
     },
     clips: {
