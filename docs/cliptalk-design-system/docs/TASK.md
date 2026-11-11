@@ -73,14 +73,14 @@ Legenda: **DoD** = *definition of done*, yaitu syarat sebuah task dianggap seles
 
 - [ ] 6.1 Migration + model + enum (`projects`, `transcripts`, `candidates`, `clips`).
 - [ ] 6.2 Upload sungguhan (chunk) ke `storage/app/cliptalk/{project}/source.*` + `ProbeVideo`.
-- [ ] 6.3 `worker/transcribe.py` (Faster-Whisper, `language="id"`, `word_timestamps=True`, `vad_filter=True`, output JSON + progres di stdout) dan `requirements.txt`.
-- [ ] 6.4 Job `TranscribeVideo` (Process, timeout, retry 1x, simpan transcript, update stage/progress).
-- [ ] 6.5 Job `GenerateCandidates` dengan heuristik dari SYSTEM-DESIGN.md §6.
-- [ ] 6.6 Endpoint status + ganti mock polling dengan polling sungguhan.
+- [x] 6.3 `worker/transcribe.py` (Faster-Whisper, `language="id"`, `word_timestamps=True`, `vad_filter=True`, output JSON + progres di stdout) dan `requirements.txt`.
+- [x] 6.4 Job `TranscribeVideo` (Process, timeout, retry 1x, simpan transcript, update stage/progress).
+- [x] 6.5 Job `GenerateCandidates` dengan heuristik dari SYSTEM-DESIGN.md §6.
+- [x] 6.6 Endpoint status + ganti mock polling dengan polling sungguhan.
 - [x] 6.7 Generator ASS (2 gaya) + job `RenderClip` (FFmpeg center crop 1080×1920, burn subtitle, progres, sha256).
-- [ ] 6.8 Unduh MP4 + SRT (`Storage::download`).
-- [ ] 6.9 Scheduler `PurgeExpiredFiles` (setiap jam).
-- [ ] 6.10 Feature test Pest untuk 7 skenario di Tabel 1 naskah.
+- [x] 6.8 Unduh MP4 + SRT (`Storage::download`).
+- [x] 6.9 Scheduler `PurgeExpiredFiles` (setiap jam).
+- [x] 6.10 Feature test Pest untuk 7 skenario di Tabel 1 naskah.
 
 ## Fase 3 — Opsional
 
