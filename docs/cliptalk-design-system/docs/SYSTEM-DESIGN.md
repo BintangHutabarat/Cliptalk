@@ -31,7 +31,7 @@ Alur pengguna (sesuai naskah dan mockup): **Unggah → (Memproses) → Pilih bag
 |---|---|---|
 | Web | Laravel 13 + Inertia 3 + React 19, TS, Tailwind 4, shadcn/ui (dipasang manual, tanpa starter kit) | Sama dengan gaya vercel/platforms (shadcn + Tailwind 4) tapi tetap Laravel |
 | DB | PostgreSQL 18 (kolom JSON memakai `jsonb`) | Aman untuk worker queue yang menulis status bersamaan; SQLite mengunci seluruh database saat menulis. File video tetap di disk, bukan di DB |
-| Lingkungan dev | Docker lewat Laravel Sail (`compose.yaml`: app PHP 8.5 + PostgreSQL) | Lingkungan sama di semua mesin; FFmpeg dan Python ditambahkan ke image di fase 2 |
+| Lingkungan dev | Docker lewat Laravel Sail (`compose.yaml`, Dockerfile di `docker/8.5`): PHP 8.5, PostgreSQL 18, FFmpeg 6.1, Faster-Whisper 1.2.1 di `/opt/whisper`, dan queue worker lewat supervisord | Lingkungan sama di semua mesin; model Whisper diunduh sekali ke `storage/app/whisper` |
 | Queue | `database` driver | Tanpa Redis; `php artisan queue:work` |
 | ASR | Faster-Whisper (Python 3.10+, CTranslate2), model `small`/`medium`, `language="id"`, `word_timestamps=True`, `vad_filter=True` | Sesuai naskah [3] |
 | Video | FFmpeg 6+ | Sesuai naskah [5] |
