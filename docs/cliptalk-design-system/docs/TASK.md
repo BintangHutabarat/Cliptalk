@@ -61,11 +61,11 @@ Legenda: **DoD** = *definition of done*, yaitu syarat sebuah task dianggap seles
 
 ### 5. Polesan dan QA frontend
 
-- [ ] **5.1** Cek aksesibilitas: navigasi keyboard di semua alur, fokus terlihat, label ARIA, dan kontras di dua tema.
-- [ ] **5.2** Cek responsif di 360, 768, 1024, dan 1440px. Pastikan tidak ada scroll horizontal.
-- [ ] **5.3** Cek `prefers-reduced-motion`.
-- [ ] **5.4** Pastikan `npm run lint`, `npm run types`, dan `npm run build` bersih.
-- [ ] **5.5** Ambil screenshot setiap halaman (terang/gelap) untuk bab Hasil & Pembahasan naskah.
+- [x] **5.1** Cek aksesibilitas: navigasi keyboard di semua alur, fokus terlihat, label ARIA, dan kontras di dua tema.
+- [x] **5.2** Cek responsif di 360, 768, 1024, dan 1440px. Pastikan tidak ada scroll horizontal.
+- [x] **5.3** Cek `prefers-reduced-motion`.
+- [x] **5.4** Pastikan `npm run lint`, `npm run types`, dan `npm run build` bersih.
+- [x] **5.5** Ambil screenshot setiap halaman (terang/gelap) untuk bab Hasil & Pembahasan naskah.
 
 ---
 

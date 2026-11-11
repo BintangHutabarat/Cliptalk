@@ -197,7 +197,7 @@ Kontras sudah dicek: semua teks ≥ 4.5:1 di kedua tema, dan border kontrol (`in
 | SegmentedControl | shadcn `toggle-group` (single) | Latar `muted`, item aktif `background` + `shadow-xs` |
 | Stepper | custom | 4 langkah bernomor. Aktif = kotak `range`, selesai = centang |
 | AppHeader | custom | 56px: wordmark, Stepper, avatar. Tanpa sidebar |
-| Dropzone | custom | Border dashed `input`. Saat file diseret di atasnya: solid `range-ink` + `range-soft` |
+| Dropzone | custom | Border dashed `input`. Saat file diseret di atasnya: solid `foreground` + `accent` (kuning hanya untuk rentang klip, RULE §3.2) |
 | FileRow | custom | Ikon film, nama (elipsis), durasi + ukuran mono, tombol Hapus |
 | SettingRow | custom | Judul + deskripsi di kiri, kontrol di kanan. Baris dalam satu Card |
 | **RangeBar** | custom | Track 4px `muted`, isian `range` 12px dengan handle `range-ink` 3×18, playhead 2px `foreground`. Varian `compact` 12px untuk daftar |
